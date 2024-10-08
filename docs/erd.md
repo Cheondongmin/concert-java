@@ -6,7 +6,8 @@ erDiagram
     USER {
         int id PK
         int userId "유저 아이디"
-        int amount "잔액"
+        varchar user_mail "유저 메일"
+        int user_amount "잔액"
     }
 
     USER_QUEUE {
@@ -41,7 +42,7 @@ erDiagram
         LocalDateTime end_at "콘서트 종료 시간"
         int total_seat "전체 좌석 수"
         int reservation_seat "남은 좌석 수"
-        varchar total_seat_status "전체 좌석 마감 상태(SOLD_OUT, AVAILABLE)"
+        varchar total_seat_status "전체 좌석 상태(SOLD_OUT, AVAILABLE)"
     }
 
     CONCERT_SEAT {
@@ -49,6 +50,8 @@ erDiagram
         int concert_schedule_id PK, FK
         int amount "좌석 금액"
         int position "좌석 번호"
+        varchar seat_status "좌석 상태(AVAILABLE, TEMP_RESERVED, RESERVED)"
+        LocalDateTime reserved_until "임시 예약 만료 시간"
     }
 
     RESERVATION {
@@ -62,8 +65,9 @@ erDiagram
         LocalDateTime concert_end_at "콘서트 종료 시간"
         int seat_amount "좌석 금액"
         int seat_position "좌석 번호"
-        varchar status "예약 상태(TEMP_RESERVED, RESERVED)"
+        varchar status "예약 상태(TEMP_RESERVED, RESERVED, CANCELED)"
         LocalDateTime reserved_at "예약 시간"
+        LocalDateTime reserved_until "예약 만료 시간"
     }
 
     CONCERT ||--o{ CONCERT_SCHEDULE: "has schedules"
@@ -72,4 +76,6 @@ erDiagram
     USER ||--o{ PAYMENT: "made payment"
     CONCERT_SEAT ||--o{ PAYMENT: "is paid for"
     RESERVATION ||--|| PAYMENT: "is paid"
+    USER ||--o{ RESERVATION: "makes reservations"
+    CONCERT_SEAT ||--o{ RESERVATION: "has reservation"
 ```
