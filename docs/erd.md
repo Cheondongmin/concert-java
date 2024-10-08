@@ -68,9 +68,10 @@ erDiagram
         LocalDateTime reserved_until_dt "예약 만료 시간"
     }
 
-    USER_AMOUNT_HISTORY {
+    USER_PAYMENT_HISTORY {
         bigint id PK
         bigint user_id PK, FK
+        bigint payment_id PK, FK
         int amount_change "금액 변경"
         varchar type "금액 사용 타입(PAYMENT, REFUND)"
         LocalDateTime change_dt "변경 시간"
@@ -84,5 +85,6 @@ erDiagram
     RESERVATION ||--|| PAYMENT: "is paid"
     USER ||--o{ RESERVATION: "makes reservations"
     CONCERT_SEAT ||--o{ RESERVATION: "has reservation"
-    USER ||--o{ USER_AMOUNT_HISTORY: "tracks amount changes"
+    USER ||--o{ USER_PAYMENT_HISTORY: "tracks amount changes"
+    PAYMENT ||--o{ USER_PAYMENT_HISTORY: "tracks amount changes"
 ```
