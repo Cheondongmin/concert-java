@@ -5,14 +5,13 @@
 erDiagram
     USER {
         bigint id PK
-        int userId "유저 아이디"
         varchar user_mail "유저 메일"
         int user_amount "잔액"
     }
 
     USER_QUEUE {
         bigint id PK "PK(대기 번호)"
-        int user_id PK, FK
+        bigint user_id PK, FK
         varchar token "대기열 토큰"
         varchar status "대기열 상태(WAITING, PROGRESS, DONE, EXPIRED)"
         LocalDateTime entered_dt "대기열 진입 시간"
@@ -21,8 +20,8 @@ erDiagram
 
     PAYMENT {
         bigint id PK "PK(결제 번호)"
-        int user_id PK, FK
-        int reservation_id PK, FK
+        bigint user_id PK, FK
+        bigint reservation_id PK, FK
         int price "결제 금액"
         varchar status "결제 상태(PROGRESS, DONE, CANCELED)"
         LocalDateTime created_dt "결제 시간"
