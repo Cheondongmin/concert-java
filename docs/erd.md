@@ -81,7 +81,6 @@ erDiagram
     CONCERT_SCHEDULE ||--o{ CONCERT_SEAT: "has seats"
     USER ||--o{ USER_QUEUE: "enters queue"
     USER ||--o{ PAYMENT: "made payment"
-    CONCERT_SEAT ||--o{ PAYMENT: "is paid for"
     RESERVATION ||--|| PAYMENT: "is paid"
     USER ||--o{ RESERVATION: "makes reservations"
     CONCERT_SEAT ||--o{ RESERVATION: "has reservation"
