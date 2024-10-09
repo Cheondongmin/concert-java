@@ -16,7 +16,7 @@ sequenceDiagram
     end
     API -->> 사용자: 대기열 token 반환
 
-    loop 1초마다 대기 순번 확인
+    loop 5초마다 대기 순번 확인
         사용자 ->> API: 대기열 순번 확인 요청 (token 포함)
         API ->> USER_QUEUE: 대기열 상태 확인 요청
         alt token 만료
@@ -97,28 +97,35 @@ sequenceDiagram
     actor 사용자 as 사용자
     participant API as API 서버
     participant CONCERT_SEAT as CONCERT_SEAT 테이블
+    participant AUTH as 토큰 인증 시스템
     participant USER_QUEUE as USER_QUEUE 테이블
     participant SEAT_SCHEDULER as 좌석 임시 배정 스케줄러
 
     사용자 ->> API: 날짜와 좌석 정보 입력하여 좌석 예약 API 요청
     Note over 사용자, API: Authorization에 token 포함
-    API ->> CONCERT_SEAT: 좌석 예약 요청 (concert_schedule_id, seat_id 포함)
-    CONCERT_SEAT ->> USER_QUEUE: 대기열 상태 확인 요청 (concert_schedule_id, user_id 포함)
-    USER_QUEUE -->> CONCERT_SEAT: 대기열 상태 반환 (status: WAITING, PROGRESS, EXPIRED)
-
-    alt 대기열 status가 EXPIRED인 경우
-        CONCERT_SEAT -->> API: 에러 응답 (대기열 만료됨)
+    API ->> AUTH: token 상태 확인
+    AUTH -->> API: token 상태 응답
+    alt token 만료
         API -->> 사용자: 에러 응답 (status: EXPIRED)
-    else 대기열 status가 PROGRESS인 경우
-        critical 좌석 임시 예약
-            CONCERT_SEAT ->> CONCERT_SEAT: 좌석 임시 예약 (seat_status: TEMP_RESERVED)
-            CONCERT_SEAT ->> CONCERT_SEAT: 좌석 데이터 삽입 (concert_schedule_id, seat_id, user_id, seat_status: TEMP_RESERVED)
-            alt 좌석이 이미 예약된 경우
-                CONCERT_SEAT -->> API: 에러 응답 (좌석이 이미 예약됨)
-                API -->> 사용자: 에러 응답 (좌석이 이미 예약됨)
-            else 좌석 임시 예약 성공
-                CONCERT_SEAT -->> API: 좌석 임시 예약 성공 응답 (seat_status: TEMP_RESERVED)
-                API -->> 사용자: 좌석 임시 예약 성공 응답
+    else
+        API ->> USER_QUEUE: 유저 대기열 상태 확인 (concert_schedule_id, user_id)
+        USER_QUEUE -->> API: 대기열 상태 응답 (WAITING, PROGRESS, EXPIRED)
+
+        alt 대기열 status가 WAITING인 경우
+            API -->> 사용자: 에러 응답 (status: WAITING)
+        else 대기열 status가 EXPIRED인 경우
+            API -->> 사용자: 에러 응답 (status: EXPIRED)
+        else 대기열 status가 PROGRESS인 경우
+            critical 좌석 임시 예약
+                API ->> CONCERT_SEAT: 좌석 예약 요청 (concert_schedule_id, seat_id 포함)
+                alt 좌석이 이미 예약된 경우
+                    CONCERT_SEAT -->> API: 에러 응답 (좌석이 이미 예약됨)
+                    API -->> 사용자: 에러 응답 (좌석이 이미 예약됨)
+                else 좌석 임시 예약 성공
+                    CONCERT_SEAT ->> CONCERT_SEAT: 좌석 데이터 삽입 (seat_status: TEMP_RESERVED)
+                    CONCERT_SEAT -->> API: 좌석 임시 예약 성공 응답 (seat_status: TEMP_RESERVED)
+                    API -->> 사용자: 좌석 임시 예약 성공 응답
+                end
             end
         end
     end
@@ -137,6 +144,7 @@ sequenceDiagram
     participant API as API 서버
     participant AUTH as 토큰 인증 시스템
     participant USER as USER 테이블
+    participant USER_PAYMENT_HISTORY as USER_PAYMENT_HISTORY 테이블
 
     사용자 ->> API: 잔액 충전 API 요청
     Note over 사용자, API: Authorization에 token 포함
@@ -156,9 +164,12 @@ sequenceDiagram
             API -->> 사용자: 에러 응답 (충전 금액이 0 이하)
         else 충전 금액이 0 이상일 경우
             USER -->> API: 충전 성공 응답 (updated 잔액)
+            API ->> USER_PAYMENT_HISTORY: 잔액 사용 내역 기록 요청 (user_id, amount_change, type: PAYMENT)
+            USER_PAYMENT_HISTORY -->> API: 기록 성공 응답
             API -->> 사용자: 충전 성공 응답 (updated 잔액)
         end
     end
+
 ```
 
 ### 잔액 조회 API
@@ -187,4 +198,69 @@ sequenceDiagram
     end
 ```
 
+### 결제 API
+```mermaid
+sequenceDiagram
+    autonumber
+    actor 사용자 as 사용자
+    participant API as API 서버
+    participant AUTH as 토큰 인증 시스템
+    participant USER as USER 테이블
+    participant USER_QUEUE as USER_QUEUE 테이블
+    participant CONCERT_SEAT as CONCERT_SEAT 테이블
+    participant PAYMENT as PAYMENT 테이블
+    participant USER_PAYMENT_HISTORY as USER_PAYMENT_HISTORY 테이블
+    participant RESERVATION as RESERVATION 테이블
+    participant QUEUE_SCHEDULER as 대기열 토큰 만료 스케줄러
 
+    사용자 ->> API: 결제 API 요청 (reservation_id 포함)
+    Note over 사용자, API: Authorization에 token 포함
+    API ->> AUTH: token 상태 확인
+    AUTH -->> API: token 상태 응답
+
+    API ->> USER_QUEUE: 유저 대기열 상태 확인 (user_id, concert_schedule_id)
+    USER_QUEUE -->> API: 대기열 상태 응답 (PROGRESS)
+
+    alt 대기열 상태가 PROGRESS인 경우
+        API ->> USER: 잔액 확인 요청 (user_id 포함)
+        USER ->> USER: 유저 존재 여부 및 잔액 확인
+
+        alt 유저 잔액이 부족한 경우
+            USER -->> API: 에러 응답 (잔액 부족)
+            API -->> 사용자: 에러 응답 (잔액 부족)
+        else 유저 잔액이 충분한 경우
+            API ->> PAYMENT: 결제 처리 요청 (user_id, reservation_id, 금액 포함)
+            PAYMENT ->> RESERVATION: 예약 상태 확인 (reservation_id 확인)
+
+            alt 예약 상태가 유효하지 않은 경우
+                RESERVATION -->> PAYMENT: 에러 응답 (유효하지 않은 예약)
+                PAYMENT -->> API: 에러 응답 (유효하지 않은 예약)
+                API -->> 사용자: 에러 응답 (유효하지 않은 예약)
+            else 예약 상태가 유효한 경우
+                API ->> USER: 잔액 차감 요청 (user_id, 결제 금액 차감)
+                USER -->> API: 잔액 차감 완료
+
+                API ->> USER_PAYMENT_HISTORY: 결제 내역 기록 (user_id, amount_change, type: PAYMENT)
+                USER_PAYMENT_HISTORY -->> API: 기록 성공 응답
+
+                API ->> CONCERT_SEAT: 좌석 상태 업데이트 (seat_id, TEMP_RESERVED -> RESERVED)
+                CONCERT_SEAT -->> API: 좌석 상태 업데이트 성공 응답
+
+                API ->> PAYMENT: 결제 상태 `DONE`으로 업데이트
+                PAYMENT -->> API: 결제 상태 업데이트 완료
+
+                API ->> USER_QUEUE: 대기열 상태를 `DONE`으로 업데이트
+                USER_QUEUE -->> API: 대기열 상태 업데이트 완료
+
+                API -->> 사용자: 결제 완료 및 좌석 예약 성공 응답
+            end
+        end
+    else 대기열 상태가 유효하지 않은 경우
+        API -->> 사용자: 에러 응답 (대기열 상태 오류)
+    end
+
+    rect rgba(0, 0, 255, .1)
+        QUEUE_SCHEDULER ->> USER_QUEUE: 만료된 대기열 토큰 확인 (5분 경과한 PROGRESS 상태)
+        USER_QUEUE ->> USER_QUEUE: 대기열 상태 `EXPIRED`로 업데이트
+    end
+```
