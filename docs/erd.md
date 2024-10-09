@@ -12,8 +12,8 @@ erDiagram
     USER_QUEUE {
         bigint id PK "PK(대기 번호)"
         bigint user_id PK, FK
-        varchar token "대기열 토큰"
-        varchar status "대기열 상태(WAITING, PROGRESS, DONE, EXPIRED)"
+        varchar token "대기열 토큰 (유저정보 포함)"
+        varchar status "대기열 상태 (WAITING, PROGRESS, DONE, EXPIRED)"
         LocalDateTime entered_dt "대기열 진입 시간"
         LocalDateTime expired_dt "대기열 만료 시간"
     }
@@ -41,6 +41,8 @@ erDiagram
         int total_seat "전체 좌석 수"
         int reservation_seat "남은 좌석 수"
         varchar total_seat_status "전체 좌석 상태(SOLD_OUT, AVAILABLE)"
+        LocalDateTime insert_dt "인입시간"
+        LocalDateTime update_dt "수정시간"
     }
 
     CONCERT_SEAT {
@@ -74,7 +76,7 @@ erDiagram
         bigint payment_id PK, FK
         int amount_change "금액 변경"
         varchar type "금액 사용 타입(PAYMENT, REFUND)"
-        LocalDateTime change_dt "변경 시간"
+        LocalDateTime insert_dt "삽입 날짜"
     }
 
     CONCERT ||--o{ CONCERT_SCHEDULE: "has schedules"
