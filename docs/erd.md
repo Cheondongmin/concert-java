@@ -24,7 +24,7 @@ erDiagram
         bigint reservation_id PK, FK
         int price "결제 금액"
         varchar status "결제 상태(PROGRESS, DONE, CANCELED)"
-        LocalDateTime created_dt "결제 시간"
+        LocalDateTime created_dt "생성 시간"
     }
 
     CONCERT {
@@ -49,7 +49,7 @@ erDiagram
         int amount "좌석 금액"
         int position "좌석 번호"
         varchar seat_status "좌석 상태(AVAILABLE, TEMP_RESERVED, RESERVED)"
-        LocalDateTime reserved_until "임시 예약 만료 시간"
+        LocalDateTime reserved_until_dt "임시 예약 만료 시간"
     }
 
     RESERVATION {
@@ -74,7 +74,7 @@ erDiagram
         bigint payment_id PK, FK
         int amount_change "금액 변경"
         varchar type "금액 사용 타입(PAYMENT, REFUND)"
-        LocalDateTime change_dt "변경 시간"
+        LocalDateTime insert_dt "인입 시간"
     }
 
     CONCERT ||--o{ CONCERT_SCHEDULE: "has schedules"
