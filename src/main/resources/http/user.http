@@ -1,0 +1,12 @@
+### 유저 요금 충전 API
+POST http://localhost:8080/v1/api/user/amount
+Authorization: Bearer <your-token-here>
+Content-Type: application/json
+
+{
+  "amount": 50000
+}
+
+### 유저 요금 조회 API
+GET http://localhost:8080/v1/api/user/amount
+Authorization: Bearer <your-token-here>

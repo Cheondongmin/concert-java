@@ -11,6 +11,8 @@ spring:
     url: jdbc:h2:mem:concert
     username: sa
     password:
+server:
+  port: 8080
 
 logging:
   level:
