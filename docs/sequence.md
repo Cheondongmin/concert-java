@@ -101,14 +101,14 @@ sequenceDiagram
     participant USER_QUEUE as USER_QUEUE 테이블
     participant SEAT_SCHEDULER as 좌석 임시 배정 스케줄러
 
-    사용자 ->> API: 날짜와 좌석 정보 입력하여 좌석 예약 API 요청
+    사용자 ->> API: 콘서트 정보와 좌석 정보 입력하여 좌석 예약 API 요청
     Note over 사용자, API: Authorization에 token 포함
     API ->> AUTH: token 상태 확인
     AUTH -->> API: token 상태 응답
     alt token 만료
         API -->> 사용자: 에러 응답 (status: EXPIRED)
-    else
-        API ->> USER_QUEUE: 유저 대기열 상태 확인 (concert_schedule_id, user_id)
+    else token 정상응답
+        API ->> USER_QUEUE: 유저 대기열 상태 확인 (concert_schedule_id)
         USER_QUEUE -->> API: 대기열 상태 응답 (WAITING, PROGRESS, EXPIRED)
 
         alt 대기열 status가 WAITING인 경우
@@ -151,7 +151,7 @@ sequenceDiagram
     API ->> AUTH: 토큰 인증 요청
     AUTH -->> API: 토큰 인증 성공
 
-    API ->> USER: 잔액 충전 요청 (user_id, 충전 금액 포함)
+    API ->> USER: 잔액 충전 요청 (충전 금액 포함)
     USER ->> USER: 유저 존재 여부 확인 (user_id 확인)
 
     alt 유저가 존재하지 않을 경우
@@ -186,7 +186,7 @@ sequenceDiagram
     API ->> AUTH: 토큰 인증 요청
     AUTH -->> API: 토큰 인증 성공
 
-    API ->> USER: 잔액 조회 요청 (user_id 포함)
+    API ->> USER: 잔액 조회 요청
     USER ->> USER: 유저 존재 여부 확인 (user_id 확인)
 
     alt 유저가 존재하지 않을 경우
@@ -218,11 +218,11 @@ sequenceDiagram
     API ->> AUTH: token 상태 확인
     AUTH -->> API: token 상태 응답
 
-    API ->> USER_QUEUE: 유저 대기열 상태 확인 (user_id, concert_schedule_id)
+    API ->> USER_QUEUE: 유저 대기열 상태 확인 (concert_schedule_id)
     USER_QUEUE -->> API: 대기열 상태 응답 (PROGRESS)
 
     alt 대기열 상태가 PROGRESS인 경우
-        API ->> USER: 잔액 확인 요청 (user_id 포함)
+        API ->> USER: 잔액 확인 요청
         USER ->> USER: 유저 존재 여부 및 잔액 확인
 
         alt 유저 잔액이 부족한 경우

@@ -1,0 +1,35 @@
+= API Documentation
+
+== Concert API
+
+=== 콘서트 스케줄 조회 API
+
+==== Request
+(요청 없음, 토큰 인증만 필요)
+
+==== Response
+include::{snippets}/select-concert/response-fields.adoc[]
+
+=== 좌석 조회 API
+
+==== Request
+(요청 없음, 토큰 인증 및 scheduleId 파라미터 필요)
+
+==== Response
+include::{snippets}/select-seat/response-fields.adoc[]
+
+=== 콘서트 예약 API
+
+==== Request
+include::{snippets}/reserve-concert/request-fields.adoc[]
+
+==== Response
+include::{snippets}/reserve-concert/response-fields.adoc[]
+
+=== 결제 API
+
+==== Request
+include::{snippets}/payment-concert/request-fields.adoc[]
+
+==== Response
+include::{snippets}/payment-concert/response-fields.adoc[]
