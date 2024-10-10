@@ -1,5 +1,8 @@
 package com.hhplus.concert.app.interfaces.v1.concert.req;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public record PaymentConcertReq(
+        @Schema(description = "콘서트 예약 id", defaultValue = "1")
         long reservationId
 ) {}

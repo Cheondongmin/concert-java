@@ -1,6 +1,9 @@
 package com.hhplus.concert.app.interfaces.v1.user.req;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public record UserAmountChargeReq(
-        int amount
+        @Schema(description = "충전금액", defaultValue = "50000")
+        long amount
 ) {
 }

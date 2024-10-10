@@ -7,20 +7,25 @@ import com.hhplus.concert.app.interfaces.v1.concert.res.PaymentConcertRes;
 import com.hhplus.concert.app.interfaces.v1.concert.res.ReserveConcertRes;
 import com.hhplus.concert.app.interfaces.v1.concert.res.SelectConcertRes;
 import com.hhplus.concert.app.interfaces.v1.concert.res.SelectSeatRes;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Tag(name = "콘서트 API", description = "콘서트 예매와 관련된 API 입니다. 모든 API는 대기열 토큰 헤더(Authorization) 가 필요합니다.")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/api/concerts")
 public class ConcertController {
 
     @GetMapping("/schedule")
+    @Operation(summary = "예약 가능 콘서트 일정 조회")
     public CommonRes<List<SelectConcertRes>> selectConcert(
-            @RequestHeader("Authorization") String token
+            @Schema(description = "대기열 토큰", defaultValue = "Bearer...") @RequestHeader("Authorization") String token
     ) {
         List<SelectConcertRes> list = new ArrayList<>();
         list.add(new SelectConcertRes(
@@ -29,7 +34,7 @@ public class ConcertController {
                 "2024-12-01",
                 "14:00",
                 "22:00",
-                "AVAILABLE"
+                true
         ));
         list.add(new SelectConcertRes(
                 2,
@@ -37,26 +42,27 @@ public class ConcertController {
                 "2024-12-02",
                 "14:00",
                 "22:00",
-                "AVAILABLE"
+                false
         ));
         return CommonRes.success(list);
     }
 
     @GetMapping("/seat")
+    @Operation(summary = "해당 콘서트 일정에 맞는 좌석 조회")
     public CommonRes<List<SelectSeatRes>> selectSeat(
-            @RequestHeader("Authorization") String token,
-            @RequestParam("scheduleId") long scheduleId
+            @Schema(description = "대기열 토큰", defaultValue = "Bearer...") @RequestHeader("Authorization")  String token,
+            @Schema(description = "콘서트 스케쥴 id", defaultValue = "1") @RequestParam("scheduleId") long scheduleId
     ) {
         List<SelectSeatRes> list = new ArrayList<>();
         list.add(new SelectSeatRes(
                 1,
-                "A1",
+                1,
                 50000,
                 "AVAILABLE"
         ));
         list.add(new SelectSeatRes(
                 2,
-                "A2",
+                2,
                 30000,
                 "AVAILABLE"
         ));
@@ -64,8 +70,9 @@ public class ConcertController {
     }
 
     @PostMapping("/reserve")
+    @Operation(summary = "해당 콘서트 좌석 임시예약 (5분)")
     public CommonRes<ReserveConcertRes> reserveConcert(
-            @RequestHeader("Authorization") String token,
+            @Schema(description = "대기열 토큰", defaultValue = "Bearer...") @RequestHeader("Authorization") String token,
             @RequestBody ReserveConcertReq req
     ) {
         return CommonRes.success(
@@ -79,13 +86,13 @@ public class ConcertController {
     }
 
     @PostMapping("/payment")
+    @Operation(summary = "결제 완료 후 임시예약 -> 예약 전환")
     public CommonRes<PaymentConcertRes> paymentConcert(
-            @RequestHeader("Authorization") String token,
+            @Schema(description = "대기열 토큰", defaultValue = "Bearer...") @RequestHeader("Authorization") String token,
             @RequestBody PaymentConcertReq req
     ) {
         return CommonRes.success(
                 new PaymentConcertRes(
-                        "콘서트 예매가 성공적으로 완료되었습니다.",
                         50000,
                         "RESERVED",
                         "DONE"
