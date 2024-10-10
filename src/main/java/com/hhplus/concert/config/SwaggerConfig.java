@@ -38,7 +38,7 @@ public class SwaggerConfig {
     private Info apiInfo() {
         return new Info()
                 .title("콘서트 예약 서비스")
-                .description("항해99 3~5주차 대기열 시스템")
+                .description("항해 플러스 6기 천동민 콘서트 서비스")
                 .version("1.0.0");
     }
 }
