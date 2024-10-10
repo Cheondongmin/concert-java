@@ -31,8 +31,8 @@ sequenceDiagram
     autonumber
     actor user as 사용자
     participant API as API 서버
-    participant RESERVATION as RESERVATION 테이블
     participant AUTH as 토큰 인증 시스템
+    participant QUEUE as QUEUE 테이블
     loop 5초마다 확인
         Note over user, API: Authorization 헤더에 token 포함
         API ->> AUTH: token 상태 확인
@@ -40,12 +40,12 @@ sequenceDiagram
         alt token 만료
             API -->> user: 에러 - token 만료
         else 정상 토큰
-            API ->> RESERVATION: 대기열 순번 확인 요청
+            API ->> QUEUE: 대기열 순번 확인 요청
             alt [대기열을 대기해야 할 경우]
-                RESERVATION -->> API: 유저의 현재 대기 순번 및 status 반환
+                QUEUE -->> API: 유저의 현재 대기 순번 및 status 반환
                 API -->> user: 현재 대기 순번 응답
             else 대기열을 통과할 수 있을 경우
-                RESERVATION -->> API: 유저가 대기열 통과 (status: PROGRESS)
+                QUEUE -->> API: 유저가 대기열 통과 (status: PROGRESS)
                 API -->> user: 예약 가능 응답 (status: PROGRESS)
             end
         end
@@ -58,23 +58,25 @@ sequenceDiagram
     autonumber
     actor 사용자 as 사용자
     participant API as API 서버
-    participant CONCERT_SCHEDULE as CONCERT_SCHEDULE 테이블
     participant AUTH as 토큰 인증 시스템
+    participant CONCERT_SCHEDULE as CONCERT_SCHEDULE 테이블
     사용자 ->> API: 예약 가능한 날짜 조회 요청
     Note over 사용자, API: Authorization 헤더에 token 포함
     API ->> AUTH: token 상태 확인
     AUTH -->> API: token 상태 응답
     alt token 만료
         API -->> 사용자: 에러 - token 만료 에러 발생
-    else 대기열 통과 안된 유저
-        API -->> 사용자: 에러 - 대기열 등록 안내 응답 (status: WAITING)
-    else 대기열 통과가 된 유저
-        API ->> CONCERT_SCHEDULE: 예약 가능한 날짜 조회 요청
-        alt 예약 가능한 날짜 없음
-            API -->> 사용자: 에러 - 예약 가능한 날짜 없음
-        else 예약 가능한 날짜가 존재
-            CONCERT_SCHEDULE -->> API: 예약 가능한 날짜와 total_seat_status 반환
-            API -->> 사용자: 예약 가능한 날짜와 total_seat_status 응답
+    else 정상토큰
+        alt 대기열 통과 안된 유저
+        API -->> 사용자: 에러 - 대기열 틍록 안내 응답
+        else 대기열 통과가 된 유저
+            API ->> CONCERT_SCHEDULE: 예약 가능한 날짜 조회 요청
+            alt 예약 가능한 날짜 없음
+                API -->> 사용자: 에러 - 예약 가능한 날짜 없음
+            else 예약 가능한 날짜가 존재
+                CONCERT_SCHEDULE -->> API: 예약 가능한 날짜와 total_seat_status 반환
+                API -->> 사용자: 예약 가능한 날짜와 total_seat_status 응답
+            end
         end
     end
 ```
@@ -112,11 +114,12 @@ sequenceDiagram
     autonumber
     actor 사용자 as 사용자
     participant API as API 서버
-    participant CONCERT_SEAT as CONCERT_SEAT 테이블
     participant AUTH as 토큰 인증 시스템
     participant QUEUE as QUEUE 테이블
+    participant CONCERT_SEAT as CONCERT_SEAT 테이블
+    participant RESERVATION as RESERVATION 테이블
     participant SEAT_SCHEDULER as 좌석 임시 배정 스케줄러
-
+    
     사용자 ->> API: 날짜와 좌석 정보 입력하여 좌석 예약 API 요청
     Note over 사용자, API: Authorization에 token 포함
     API ->> AUTH: token 상태 확인
@@ -137,9 +140,9 @@ sequenceDiagram
                 alt 좌석이 이미 예약된 경우
                     CONCERT_SEAT -->> API: 에러 응답 (좌석이 이미 예약됨)
                     API -->> 사용자: 에러 응답 (좌석이 이미 예약됨)
-                else 좌석 임시 예약 성공
-                    CONCERT_SEAT ->> CONCERT_SEAT: 좌석 데이터 삽입 (seat_status: TEMP_RESERVED)
-                    CONCERT_SEAT -->> API: 좌석 임시 예약 성공 응답 (seat_status: TEMP_RESERVED)
+                else 좌석 예약 가능한 경우
+                    API ->> RESERVATION: 예약 데이터 삽입 (status: TEMP_RESERVED)
+                    API -->> CONCERT_SEAT: 좌석 데이터 임시예약 전환 (seat_status: TEMP_RESERVED)
                     API -->> 사용자: 좌석 임시 예약 성공 응답
                 end
             end
