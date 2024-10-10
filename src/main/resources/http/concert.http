@@ -1,0 +1,27 @@
+### 예약 가능 콘서트 일정 조회 API
+GET http://localhost:8080/v1/api/concerts/schedule
+Authorization: Bearer <your-token-here>
+
+### 해당 콘서트 일정에 맞는 좌석 조회 API
+GET http://localhost:8080/v1/api/concerts/seat?scheduleId=1
+Authorization: Bearer <your-token-here>
+
+### 콘서트 좌석 임시 예약 API (5분)
+POST http://localhost:8080/v1/api/concerts/reserve
+Authorization: Bearer <your-token-here>
+Content-Type: application/json
+
+{
+  "scheduleId": 1,
+  "seatId": 1
+}
+
+### 결제 완료 후 예약 전환 API
+POST http://localhost:8080/v1/api/concerts/payment
+Authorization: Bearer <your-token-here>
+Content-Type: application/json
+
+{
+  "reservationId": 1234,
+  "purchaseAmount": 50000
+}
