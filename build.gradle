@@ -2,7 +2,6 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.2.11-SNAPSHOT'
 	id 'io.spring.dependency-management' version '1.1.6'
-	id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
 
 group = 'com.hhplus'
@@ -43,25 +42,14 @@ dependencies {
 	// test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
-	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
-	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
-	testImplementation 'junit:junit:4.13.2'
-	testImplementation 'org.junit.vintage:junit-vintage-engine:5.9.0' // JUnit 4 테스트 실행 엔진
 
 	// gson
 	implementation 'com.google.code.gson:gson:2.8.9'
-}
 
-// snippetsDir 변수를 선언하여 스니펫 저장 디렉터리를 지정합니다.
-def snippetsDir = file("build/generated-snippets")
+	// mariadb
+	implementation 'org.mariadb.jdbc:mariadb-java-client:3.4.1'
+}
 
 tasks.named('test') {
 	useJUnitPlatform()
-	outputs.dir snippetsDir
-}
-
-asciidoctor {
-	inputs.dir snippetsDir
-	dependsOn test
 }

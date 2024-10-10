@@ -10,40 +10,57 @@ import com.hhplus.concert.app.interfaces.v1.concert.res.SelectSeatRes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/api/concerts")
 public class ConcertController {
 
     @GetMapping("/schedule")
-    public CommonRes<SelectConcertRes> selectConcert(
+    public CommonRes<List<SelectConcertRes>> selectConcert(
             @RequestHeader("Authorization") String token
     ) {
-        return CommonRes.success(
-                new SelectConcertRes(
-                        1,
-                        "2024 싸이 흠뻑쇼",
-                        "2024-12-01",
-                        "14:00",
-                        "22:00",
-                        "AVAILABLE"
-                )
-        );
+        List<SelectConcertRes> list = new ArrayList<>();
+        list.add(new SelectConcertRes(
+                1,
+                "2024 싸이 흠뻑쇼",
+                "2024-12-01",
+                "14:00",
+                "22:00",
+                "AVAILABLE"
+        ));
+        list.add(new SelectConcertRes(
+                2,
+                "2024 블랙핑크 콘서트",
+                "2024-12-02",
+                "14:00",
+                "22:00",
+                "AVAILABLE"
+        ));
+        return CommonRes.success(list);
     }
 
     @GetMapping("/seat")
-    public CommonRes<SelectSeatRes> selectSeat(
+    public CommonRes<List<SelectSeatRes>> selectSeat(
             @RequestHeader("Authorization") String token,
             @RequestParam("scheduleId") long scheduleId
     ) {
-        return CommonRes.success(
-                new SelectSeatRes(
-                        100,
-                        "A1",
-                        50000,
-                        "AVAILABLE"
-                )
-        );
+        List<SelectSeatRes> list = new ArrayList<>();
+        list.add(new SelectSeatRes(
+                1,
+                "A1",
+                50000,
+                "AVAILABLE"
+        ));
+        list.add(new SelectSeatRes(
+                2,
+                "A2",
+                30000,
+                "AVAILABLE"
+        ));
+        return CommonRes.success(list);
     }
 
     @PostMapping("/reserve")
