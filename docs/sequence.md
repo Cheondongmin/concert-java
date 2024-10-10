@@ -42,14 +42,19 @@ sequenceDiagram
         alt token 만료
             API -->> user: 에러 - token 만료 (status: EXPIRED)
         else 정상 토큰
-            API ->> QUEUE: 유저 대기열 상태 확인 (해당 유저의 진입 시간과 대기열 정보 조회)
-            alt 유저가 대기열 통과 가능 (제한 인원 미달 또는 자리가 생김)
-                QUEUE -->> QUEUE: 토큰 만료 시간 10분 연장, 상태 PROGRESS로 업데이트
-                QUEUE -->> API: 유저의 현재 대기 순번 및 status 반환
-                API -->> user: 예약 가능 응답 (status: PROGRESS)
-            else 대기 중 (대기열 인원이 꽉 찼거나 유저 순번이 아직 도달하지 않음)
-                QUEUE -->> QUEUE: 대기 순번 재계산 (유저보다 먼저 들어온 사람 수 확인 후 + 1)
-                QUEUE -->> API: 유저 대기 순번 및 status 반환
+            API ->> QUEUE: 현재 PROGRESS 상태 유저 수 확인
+            alt 활성화된 유저 수 N명 미만
+                API ->> QUEUE: 유저 대기열 상태 확인 (유저 진입 시간과 대기 순번 정보 조회)
+                alt 유저가 대기열 통과 가능 (제한 인원 미달 또는 자리가 생김)
+                    QUEUE -->> QUEUE: 토큰 만료 시간 10분 연장, 상태 PROGRESS로 업데이트
+                    QUEUE -->> API: 유저의 현재 대기 순번 및 status 반환
+                    API -->> user: 예약 가능 응답 (status: PROGRESS)
+                else 대기 중 (유저 순번이 아직 도달하지 않음)
+                    QUEUE -->> QUEUE: 대기 순번 재계산 (유저보다 먼저 들어온 사람 수 확인 후 + 1)
+                    QUEUE -->> API: 유저 대기 순번 및 status 반환
+                    API -->> user: 대기 중 응답 (status: WAITING)
+                end
+            else 활성화된 유저 수 N명 초과
                 API -->> user: 대기 중 응답 (status: WAITING)
             end
         end
@@ -58,8 +63,8 @@ sequenceDiagram
     alt 대기열에서 자리가 생김 (예: 좌석 취소 또는 임시 예약 만료)
         Note over API, QUEUE: 자리가 생긴 상황 감지
         SEAT ->> QUEUE: 좌석 상태 변경 (TEMP_RESERVED -> AVAILABLE)
-        QUEUE ->> QUEUE: 가장 먼저 들어온 유저 상태 업데이트 (status: PROGRESS)
-        API ->> user: 대기열 통과 가능 응답 (status: PROGRESS)
+        QUEUE -->> QUEUE: 가장 오래된 유저 상태를 PROGRESS로 변경
+        API -->> user: 대기열 통과 가능 응답 (status: PROGRESS)
     end
 
 ```
