@@ -25,7 +25,7 @@ sequenceDiagram
     end
 ```
 
-### 유저 대기열 토큰 조회 (풀링용)
+### 유저 대기열 토큰 체크 (풀링용)
 ```mermaid
 sequenceDiagram
     autonumber
