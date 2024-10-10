@@ -9,7 +9,7 @@ erDiagram
         int user_amount "잔액"
     }
 
-    USER_QUEUE {
+    QUEUE {
         bigint id PK "PK(대기 번호)"
         bigint user_id PK, FK
         varchar token "대기열 토큰"
@@ -68,7 +68,7 @@ erDiagram
         LocalDateTime reserved_until_dt "예약 만료 시간"
     }
 
-    USER_PAYMENT_HISTORY {
+    PAYMENT_HISTORY {
         bigint id PK
         bigint user_id PK, FK
         bigint payment_id PK, FK
@@ -79,11 +79,11 @@ erDiagram
 
     CONCERT ||--o{ CONCERT_SCHEDULE: "has schedules"
     CONCERT_SCHEDULE ||--o{ CONCERT_SEAT: "has seats"
-    USER ||--o{ USER_QUEUE: "enters queue"
+    USER ||--o{ QUEUE: "enters queue"
     USER ||--o{ PAYMENT: "made payment"
     RESERVATION ||--|| PAYMENT: "is paid"
     USER ||--o{ RESERVATION: "makes reservations"
     CONCERT_SEAT ||--o{ RESERVATION: "has reservation"
-    USER ||--o{ USER_PAYMENT_HISTORY: "tracks amount changes"
-    PAYMENT ||--o{ USER_PAYMENT_HISTORY: "tracks amount changes"
+    USER ||--o{ PAYMENT_HISTORY: "tracks amount changes"
+    PAYMENT ||--o{ PAYMENT_HISTORY: "tracks amount changes"
 ```

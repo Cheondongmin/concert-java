@@ -7,7 +7,7 @@ CREATE TABLE USER
 );
 
 -- USER_QUEUE 테이블: 유저의 대기열 정보를 저장하는 테이블
-CREATE TABLE USER_QUEUE
+CREATE TABLE QUEUE
 (
     id         BIGINT PRIMARY KEY,                                           -- 대기열 번호 (PK)
     user_id    BIGINT       NOT NULL,                                        -- 유저 ID (FK)
@@ -89,7 +89,7 @@ CREATE TABLE PAYMENT
 
 
 -- USER_PAYMENT_HISTORY 테이블: 유저 금액 사용 내역을 저장하는 테이블
-CREATE TABLE USER_PAYMENT_HISTORY
+CREATE TABLE PAYMENT_HISTORY
 (
     id            BIGINT PRIMARY KEY,                                                     -- 금액 사용 내역 ID (PK)
     user_id       BIGINT   NOT NULL,                                                      -- 유저 ID (FK)
