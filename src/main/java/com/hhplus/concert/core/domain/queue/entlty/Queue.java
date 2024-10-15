@@ -83,7 +83,7 @@ public class Queue {
     public static Queue checkWatingQueue(List<Queue> queueList, Queue queue) {
         if(queueList.size() < 30) {
             // 10분 증가
-            LocalDateTime expiredDt = queue.getExpiredDt().plusMinutes(10);
+            LocalDateTime expiredDt = LocalDateTime.now().plusMinutes(10);
 
             // 큐 진입 가능
             return new Queue(queue.getUsers().getId(), queue.getToken(), QueueStatus.PROGRESS, expiredDt);
