@@ -40,16 +40,11 @@ public class ConcertSchedule {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "total_seat_status", nullable = false)
-    private SeatStatus totalSeatStatus;
+    private TotalSeatStatus totalSeatStatus;
 
     @Column(name = "created_dt", nullable = false)
     private LocalDateTime createdDt;
 
     @Column(name = "is_delete", nullable = false)
     private Boolean isDelete = false;
-
-    enum SeatStatus {
-        SOLD_OUT,
-        AVAILABLE
-    }
 }

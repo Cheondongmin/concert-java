@@ -40,10 +40,4 @@ public class ConcertSeat {
 
     @Column(name = "is_delete", nullable = false)
     private Boolean isDelete = false;
-
-    enum SeatStatus {
-        AVAILABLE,
-        TEMP_RESERVED,
-        RESERVED
-    }
 }
