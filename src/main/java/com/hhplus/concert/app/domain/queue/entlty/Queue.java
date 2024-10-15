@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
@@ -61,6 +62,19 @@ public class Queue {
         }
 
         return false; // 그 외의 경우 토큰은 유효하지 않음
+    }
+
+    // 새로운 토큰을 발급하거나 기존 토큰을 반환하는 로직
+    public static Queue enterQueue(Queue existingQueue, Long userId) {
+        if (existingQueue != null && existingQueue.isTokenValid()) {
+            return existingQueue; // 기존 유효 토큰 반환
+        }
+        return new Queue(userId, generateNewToken()); // 새 토큰 발급
+    }
+
+    // 새로운 토큰 생성
+    private static String generateNewToken() {
+        return UUID.randomUUID().toString();
     }
 }
 
