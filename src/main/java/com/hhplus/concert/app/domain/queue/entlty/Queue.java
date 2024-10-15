@@ -14,6 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Table(name = "QUEUE")
 public class Queue {
 
     @Id
