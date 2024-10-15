@@ -5,3 +5,10 @@ springdoc:
     path: /swagger-ui.html  # Swagger UI 경로
     display-request-duration: true
     operationsSorter: method
+
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: test
