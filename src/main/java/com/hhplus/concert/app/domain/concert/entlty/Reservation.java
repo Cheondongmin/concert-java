@@ -21,13 +21,11 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users users;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
-    @ManyToOne
-    @JoinColumn(name = "seat_id", nullable = false)
-    private ConcertSeat concertSeat;
+    @Column(name = "seat_id", nullable = false)
+    private Long seatId;
 
     @Column(name = "concert_title", nullable = false)
     private String concertTitle;

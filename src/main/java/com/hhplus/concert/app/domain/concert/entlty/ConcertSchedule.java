@@ -20,9 +20,8 @@ public class ConcertSchedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "concert_id", nullable = false)
-    private Concert concert;
+    @Column(name = "concert_id", nullable = false)
+    private Long concertId;
 
     @Column(name = "open_dt", nullable = false)
     private LocalDate openDt;
