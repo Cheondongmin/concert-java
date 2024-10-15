@@ -19,7 +19,7 @@ public class QueueRepositoryImpl implements QueueRepository {
     @Override
     public Queue findByUserId(Long userId) {
         return queueJpaRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저의 큐가 존재하지 않습니다."));
+                .orElse(null);
     }
 
     @Override

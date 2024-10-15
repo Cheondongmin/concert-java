@@ -1,4 +1,4 @@
-package com.hhplus.concert.core.application.queue.dto;
+package com.hhplus.concert.core.domain.queue.dto;
 
 import com.hhplus.concert.core.domain.queue.entlty.QueueStatus;
 

@@ -1,6 +1,6 @@
 package com.hhplus.concert.core.interfaces.v1.queue;
 
-import com.hhplus.concert.core.application.queue.dto.SelectQueueTokenResult;
+import com.hhplus.concert.core.domain.queue.dto.SelectQueueTokenResult;
 import com.hhplus.concert.core.domain.queue.service.QueueService;
 import com.hhplus.concert.core.interfaces.common.CommonRes;
 import com.hhplus.concert.core.interfaces.v1.queue.req.CreateQueueTokenReq;

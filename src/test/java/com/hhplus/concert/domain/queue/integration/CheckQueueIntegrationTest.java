@@ -1,13 +1,12 @@
 package com.hhplus.concert.domain.queue.integration;
 
 import com.hhplus.concert.IntegrationTest;
-import com.hhplus.concert.core.application.queue.dto.SelectQueueTokenResult;
+import com.hhplus.concert.core.domain.queue.dto.SelectQueueTokenResult;
 import com.hhplus.concert.core.domain.queue.entlty.Queue;
 import com.hhplus.concert.core.domain.queue.entlty.QueueStatus;
 import com.hhplus.concert.core.domain.queue.repository.QueueRepository;
 import com.hhplus.concert.core.domain.queue.service.QueueService;
 import com.hhplus.concert.core.domain.user.repository.UserRepository;
-import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
