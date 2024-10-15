@@ -51,6 +51,9 @@ dependencies {
 
 	// springDocs
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+
+	// Guava
+	implementation("com.google.guava:guava:33.0.0-jre")
 }
 
 tasks.named('test') {

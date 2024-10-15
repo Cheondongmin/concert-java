@@ -1,5 +1,6 @@
 package com.hhplus.concert.app.interfaces.v1.queue;
 
+import com.hhplus.concert.app.domain.queue.service.QueueService;
 import com.hhplus.concert.app.interfaces.common.CommonRes;
 import com.hhplus.concert.app.interfaces.v1.queue.req.CreateQueueTokenReq;
 import com.hhplus.concert.app.interfaces.v1.queue.res.CreateQueueTokenRes;
@@ -16,12 +17,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/api/queue")
 public class QueueController {
 
+    private final QueueService queueService;
+
     @Operation(summary = "유저 대기열 토큰 발급 API")
     @PostMapping("/token")
     public CommonRes<CreateQueueTokenRes> createQueueToken(
             @RequestBody CreateQueueTokenReq req
     ) {
-        return CommonRes.success(new CreateQueueTokenRes("Bearer..."));
+        return CommonRes.success(new CreateQueueTokenRes(queueService.enterQueue(req.userId())));
     }
 
     @Operation(summary = "유저 대기열 토큰 체크 API")
@@ -31,5 +34,4 @@ public class QueueController {
     ) {
         return CommonRes.success(new SelectQueueTokenRes(960430, "WAITING"));
     }
-
 }

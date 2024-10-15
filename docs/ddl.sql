@@ -1,5 +1,5 @@
 -- USER 테이블: 유저 정보를 저장하는 테이블
-CREATE TABLE USER
+CREATE TABLE USERS
 (
     id          BIGINT PRIMARY KEY COMMENT '유저 ID (PK)',
     user_mail   VARCHAR(255) NOT NULL COMMENT '유저 메일',
@@ -17,7 +17,7 @@ CREATE TABLE QUEUE
     status     ENUM('WAITING', 'PROGRESS', 'DONE', 'EXPIRED') NOT NULL COMMENT '대기열 상태',
     entered_dt DATETIME     NOT NULL COMMENT '대기열 진입 시간',
     expired_dt DATETIME DEFAULT NULL COMMENT '대기열 만료 시간',
-    CONSTRAINT fk_queue_user FOREIGN KEY (user_id) REFERENCES USER (id)
+    CONSTRAINT fk_queue_user FOREIGN KEY (user_id) REFERENCES USERS (id)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -83,7 +83,7 @@ CREATE TABLE RESERVATION
     reserved_until_dt   DATETIME              DEFAULT NULL COMMENT '예약 만료 시간',
     created_dt          DATETIME     NOT NULL COMMENT '생성 시간',
     is_delete           BOOLEAN      NOT NULL DEFAULT FALSE COMMENT '삭제 여부 (Y, N)',
-    CONSTRAINT fk_reservation_user FOREIGN KEY (user_id) REFERENCES USER (id)
+    CONSTRAINT fk_reservation_user FOREIGN KEY (user_id) REFERENCES USERS (id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     CONSTRAINT fk_reservation_schedule FOREIGN KEY (concert_schedule_id) REFERENCES CONCERT_SCHEDULE (id)
@@ -104,7 +104,7 @@ CREATE TABLE PAYMENT
     status         ENUM('PROGRESS', 'DONE', 'CANCELED') NOT NULL COMMENT '결제 상태',
     created_dt     DATETIME NOT NULL COMMENT '결제 시간',
     is_delete      BOOLEAN  NOT NULL DEFAULT FALSE COMMENT '삭제 여부 (Y, N)',
-    CONSTRAINT fk_payment_user FOREIGN KEY (user_id) REFERENCES USER (id)
+    CONSTRAINT fk_payment_user FOREIGN KEY (user_id) REFERENCES USERS (id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     CONSTRAINT fk_payment_reservation FOREIGN KEY (reservation_id) REFERENCES RESERVATION (id)
@@ -122,7 +122,7 @@ CREATE TABLE PAYMENT_HISTORY
     type          ENUM('PAYMENT', 'REFUND') NOT NULL COMMENT '금액 사용 타입',
     created_dt    DATETIME NOT NULL COMMENT '금액 변경 시간',
     is_delete     BOOLEAN  NOT NULL DEFAULT FALSE COMMENT '삭제 여부 (Y, N)',
-    CONSTRAINT fk_payment_history_user FOREIGN KEY (user_id) REFERENCES USER (id)
+    CONSTRAINT fk_payment_history_user FOREIGN KEY (user_id) REFERENCES USERS (id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     CONSTRAINT fk_payment_history_payment FOREIGN KEY (payment_id) REFERENCES PAYMENT (id)

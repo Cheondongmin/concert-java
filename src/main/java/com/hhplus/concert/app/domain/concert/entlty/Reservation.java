@@ -1,6 +1,6 @@
 package com.hhplus.concert.app.domain.concert.entlty;
 
-import com.hhplus.concert.app.domain.user.entlty.User;
+import com.hhplus.concert.app.domain.user.entlty.Users;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -23,7 +23,7 @@ public class Reservation {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Users users;
 
     @ManyToOne
     @JoinColumn(name = "seat_id", nullable = false)
@@ -62,10 +62,4 @@ public class Reservation {
 
     @Column(name = "is_delete", nullable = false)
     private Boolean isDelete = false;
-}
-
-enum ReservationStatus {
-    TEMP_RESERVED,
-    RESERVED,
-    CANCELED
 }

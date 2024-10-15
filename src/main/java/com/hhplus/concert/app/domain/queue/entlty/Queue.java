@@ -1,6 +1,6 @@
 package com.hhplus.concert.app.domain.queue.entlty;
 
-import com.hhplus.concert.app.domain.user.entlty.User;
+import com.hhplus.concert.app.domain.user.entlty.Users;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -21,7 +21,7 @@ public class Queue {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Users users;
 
     @Column(name = "token", nullable = false)
     private String token;
@@ -35,11 +35,32 @@ public class Queue {
 
     @Column(name = "expired_dt")
     private LocalDateTime expiredDt;
+
+    public Queue(Long userId, String token) {
+        this.users = new Users(userId);
+        this.token = token;
+        this.status = QueueStatus.WAITING;
+        this.enteredDt = LocalDateTime.now();
+        this.expiredDt = null;
+    }
+
+    public Queue(Long userId, String token, QueueStatus status, LocalDateTime expiredDt) {
+        this.users = new Users(userId);
+        this.token = token;
+        this.status = status;
+        this.enteredDt = LocalDateTime.now();
+        this.expiredDt = expiredDt;
+    }
+
+    // 토큰 유효성 검증 로직
+    public boolean isTokenValid() {
+        // 토큰 상태가 WAITING 또는 PROGRESS일 때 유효
+        if (status == QueueStatus.WAITING || status == QueueStatus.PROGRESS) {
+            // 만료 시간이 없거나, 만료 시간이 현재 시간 이후일 때 유효
+            return expiredDt == null || expiredDt.isAfter(LocalDateTime.now());
+        }
+
+        return false; // 그 외의 경우 토큰은 유효하지 않음
+    }
 }
 
-enum QueueStatus {
-    WAITING,
-    PROGRESS,
-    DONE,
-    EXPIRED
-}

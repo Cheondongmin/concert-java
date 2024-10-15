@@ -3,7 +3,7 @@
 
 ```mermaid
 erDiagram
-    USER {
+    CONSERT_USER {
         bigint id PK
         varchar user_mail "유저 메일"
         bigint user_amount "잔액"
