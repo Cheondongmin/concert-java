@@ -40,7 +40,7 @@ public class QueueService {
         // 만약 상태가 WATING이면, 현재 포지션 가져오기
         if(queue.getStatus().equals(QueueStatus.WAITING)) {
             // 현재 유저의 뒤에 남아있는 대기열 + 1(자기 자신)
-            queuePosition = queueRepository.findCountByEnterDtAndStatus(queue.getEnteredDt(), QueueStatus.WAITING) + 1;
+            queuePosition = queueRepository.findStatusIsWaitingAndAlreadyEnteredBy(queue.getEnteredDt(), QueueStatus.WAITING) + 1;
         }
 
         // 변경되지 않은 엔티티는 업데이트 되지 않음.

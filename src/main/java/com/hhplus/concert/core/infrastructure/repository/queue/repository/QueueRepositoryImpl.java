@@ -44,7 +44,7 @@ public class QueueRepositoryImpl implements QueueRepository {
     }
 
     @Override
-    public Long findCountByEnterDtAndStatus(LocalDateTime enteredDt, QueueStatus queueStatus) {
-        return queueJpaRepository.countByEnteredDtAndStatus(enteredDt, queueStatus);
+    public Long findStatusIsWaitingAndAlreadyEnteredBy(LocalDateTime enteredDt, QueueStatus queueStatus) {
+        return queueJpaRepository.findStatusIsWaitingAndAlreadyEnteredBy(enteredDt, queueStatus);
     }
 }

@@ -12,5 +12,5 @@ public interface QueueRepository {
     List<Queue> findAll();
     List<Queue> findOrderByDescByStatus(QueueStatus queueStatus);
     Queue findByToken(String token);
-    Long findCountByEnterDtAndStatus(LocalDateTime enteredDt, QueueStatus queueStatus);
+    Long findStatusIsWaitingAndAlreadyEnteredBy(LocalDateTime enteredDt, QueueStatus queueStatus);
 }

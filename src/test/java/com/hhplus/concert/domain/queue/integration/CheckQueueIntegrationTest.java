@@ -78,7 +78,7 @@ public class CheckQueueIntegrationTest extends IntegrationTest {
         assertAll(
                 () -> assertThat(waitingQueueList.size()).isGreaterThanOrEqualTo(30), // 대기열 30명 확인
                 () -> assertThat(result.status()).isEqualTo(QueueStatus.WAITING), // 상태는 여전히 WAITING이어야 함
-                () -> assertThat(result.queuePosition()).isEqualTo(2L) // 대기 포지션이 정상적으로 계산되었는지 확인
+                () -> assertThat(result.queuePosition()).isEqualTo(31L) // 대기 포지션이 정상적으로 계산되었는지 확인
         );
     }
 }
