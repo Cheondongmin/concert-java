@@ -3,7 +3,7 @@ package com.hhplus.concert.domain.queue.integration;
 import com.hhplus.concert.IntegrationTest;
 import com.hhplus.concert.app.domain.queue.entlty.Queue;
 import com.hhplus.concert.app.domain.queue.repository.QueueRepository;
-import com.hhplus.concert.app.domain.queue.service.QueueService;
+import com.hhplus.concert.app.domain.queue.service.QueueEnterService;
 import com.hhplus.concert.app.domain.user.repository.UserRepository;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Test;
@@ -32,10 +32,10 @@ public class EnterQueueIntegrationTest extends IntegrationTest {
         // 먼저 User를 저장해야 함
         userRepository.save(userId); // User 엔티티를 저장하는 코드가 필요
 
-        QueueService queueService = new QueueService(queueRepository);
+        QueueEnterService queueEnterService = new QueueEnterService(queueRepository);
 
         // when
-        String queueToken = queueService.enterQueue(userId);
+        String queueToken = queueEnterService.enterQueue(userId);
 
         // then
         List<Queue> userQueues = queueRepository.findAll();
@@ -49,16 +49,16 @@ public class EnterQueueIntegrationTest extends IntegrationTest {
     void 대기열에_존재할_경우_기존_대기열_토큰을_반환한다() {
         // given
         String existQueueToken = "existQueueToken";
-        QueueService queueService = new QueueService(queueRepository);
+        QueueEnterService queueEnterService = new QueueEnterService(queueRepository);
         Long userId = 1L;
 
         // 먼저 User를 저장해야 함
         userRepository.save(userId); // User 엔티티를 저장하는 코드가 필요
 
-        queueRepository.save(userId, existQueueToken);
+        queueRepository.save(new Queue(userId, existQueueToken));
 
         // when
-        String queueToken = queueService.enterQueue(userId);
+        String queueToken = queueEnterService.enterQueue(userId);
 
         // then
         List<Queue> userQueues = queueRepository.findAll();

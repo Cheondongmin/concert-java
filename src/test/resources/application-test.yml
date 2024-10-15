@@ -1,0 +1,28 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:concert
+    username: sa
+    password:
+server:
+  port: 8080
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs   # OpenAPI 문서를 제공하는 경로
+  swagger-ui:
+    path: /swagger-ui.html  # Swagger UI 경로
+    display-request-duration: true
+    operationsSorter: method

@@ -21,9 +21,8 @@ public class QueueRepositoryImpl implements QueueRepository {
     }
 
     @Override
-    public void save(Long userId, String token) {
-        Queue newQueue = new Queue(userId, token);
-        queueJpaRepository.save(newQueue);
+    public void save(Queue queue) {
+        queueJpaRepository.save(queue);
     }
 
     @Override
