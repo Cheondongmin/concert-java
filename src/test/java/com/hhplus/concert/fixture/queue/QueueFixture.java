@@ -1,7 +1,7 @@
 package com.hhplus.concert.fixture.queue;
 
-import com.hhplus.concert.app.domain.queue.entlty.Queue;
-import com.hhplus.concert.app.domain.queue.entlty.QueueStatus;
+import com.hhplus.concert.core.domain.queue.entlty.Queue;
+import com.hhplus.concert.core.domain.queue.entlty.QueueStatus;
 
 import java.time.LocalDateTime;
 

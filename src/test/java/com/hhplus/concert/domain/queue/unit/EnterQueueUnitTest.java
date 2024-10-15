@@ -1,13 +1,16 @@
 package com.hhplus.concert.domain.queue.unit;
 
-import com.hhplus.concert.app.domain.queue.entlty.Queue;
-import com.hhplus.concert.app.domain.queue.entlty.QueueStatus;
+import com.hhplus.concert.core.domain.queue.entlty.Queue;
+import com.hhplus.concert.core.domain.queue.entlty.QueueStatus;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 import static com.hhplus.concert.fixture.queue.QueueFixture.신규유저_큐;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class EnterQueueUnitTest {

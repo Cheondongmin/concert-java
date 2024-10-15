@@ -17,7 +17,6 @@ sequenceDiagram
         waitingSystem -->> server: 신규 대기열 토큰 생성 및 반환
     end
     server -->> user: 대기열 토큰 반환
-~~~~~~~~~~~~~~~~
     rect rgba(0, 0, 255, .1)
         Note over QUEUE_SCHEDULER: 10초에 한번 호출
         QUEUE_SCHEDULER ->> QUEUE: 만료된 대기열 토큰 확인 (현재시간으로 부터 5분 이상 경과한 PROGRESS 상태)
