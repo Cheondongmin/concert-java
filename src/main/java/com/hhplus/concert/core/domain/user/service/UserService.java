@@ -19,7 +19,6 @@ public class UserService {
         return user.getUserAmount();
     }
 
-
     @Transactional
     public Long chargeUserAmount(String token, Long amount) {
         long userId = Users.extractUserIdFromJwt(token);
