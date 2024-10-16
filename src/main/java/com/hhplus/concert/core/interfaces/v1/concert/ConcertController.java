@@ -1,8 +1,8 @@
 package com.hhplus.concert.core.interfaces.v1.concert;
 
 import com.hhplus.concert.core.domain.concert.ConcertService;
-import com.hhplus.concert.core.domain.concert.SeatStatus;
 import com.hhplus.concert.core.domain.concert.SelectConcertResult;
+import com.hhplus.concert.core.domain.concert.SelectSeatResult;
 import com.hhplus.concert.core.interfaces.common.CommonRes;
 import com.hhplus.concert.core.interfaces.v1.concert.req.PaymentConcertReq;
 import com.hhplus.concert.core.interfaces.v1.concert.req.ReserveConcertReq;
@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Tag(name = "콘서트 API", description = "콘서트 예매와 관련된 API 입니다. 모든 API는 대기열 토큰 헤더(Authorization) 가 필요합니다.")
@@ -42,20 +41,8 @@ public class ConcertController {
             @Schema(description = "대기열 토큰", defaultValue = "Bearer...") @RequestHeader("Authorization")  String token,
             @Schema(description = "콘서트 스케쥴 id", defaultValue = "1") @RequestParam("scheduleId") long scheduleId
     ) {
-        List<SelectSeatRes> list = new ArrayList<>();
-        list.add(new SelectSeatRes(
-                1,
-                1,
-                50000,
-                SeatStatus.AVAILABLE
-        ));
-        list.add(new SelectSeatRes(
-                2,
-                2,
-                30000,
-                SeatStatus.AVAILABLE
-        ));
-        return CommonRes.success(list);
+        List<SelectSeatResult> seatList = concertService.selectConcertSeatList(token, scheduleId);
+        return CommonRes.success(SelectSeatRes.of(seatList));
     }
 
     @PostMapping("/reserve")

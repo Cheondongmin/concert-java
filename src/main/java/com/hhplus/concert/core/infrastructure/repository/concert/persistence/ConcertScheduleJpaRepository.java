@@ -23,6 +23,10 @@ public interface ConcertScheduleJpaRepository extends JpaRepository<ConcertSched
             cs.startDt >= current_timestamp
         and
             cs.totalSeatStatus = "AVAILABLE"
+        and
+            cs.isDelete = false
+        and
+            c.isDelete = false
        """)
     List<SelectConcertResult> findConcertSchedule();
 
