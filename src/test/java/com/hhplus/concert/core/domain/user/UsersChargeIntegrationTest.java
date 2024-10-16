@@ -28,15 +28,9 @@ class UsersChargeIntegrationTest extends IntegrationTest {
 
         // when
         CompletableFuture.allOf(
-                CompletableFuture.runAsync(() -> {
-                    userService.chargeUserAmount(useToken,1000L);
-                }),
-                CompletableFuture.runAsync(() -> {
-                    userService.chargeUserAmount(useToken,2000L);
-                }),
-                CompletableFuture.runAsync(() -> {
-                    userService.chargeUserAmount(useToken,3000L);
-                })
+                CompletableFuture.runAsync(() -> userService.chargeUserAmount(useToken,1000L)),
+                CompletableFuture.runAsync(() -> userService.chargeUserAmount(useToken,2000L)),
+                CompletableFuture.runAsync(() -> userService.chargeUserAmount(useToken,3000L))
         ).join();
 
         Thread.sleep(100L);

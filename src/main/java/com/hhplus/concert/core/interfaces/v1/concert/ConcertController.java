@@ -1,5 +1,8 @@
 package com.hhplus.concert.core.interfaces.v1.concert;
 
+import com.hhplus.concert.core.domain.concert.ConcertService;
+import com.hhplus.concert.core.domain.concert.SeatStatus;
+import com.hhplus.concert.core.domain.concert.SelectConcertResult;
 import com.hhplus.concert.core.interfaces.common.CommonRes;
 import com.hhplus.concert.core.interfaces.v1.concert.req.PaymentConcertReq;
 import com.hhplus.concert.core.interfaces.v1.concert.req.ReserveConcertReq;
@@ -22,29 +25,15 @@ import java.util.List;
 @RequestMapping("/v1/api/concerts")
 public class ConcertController {
 
+    private final ConcertService concertService;
+
     @GetMapping("/schedule")
     @Operation(summary = "예약 가능 콘서트 일정 조회")
     public CommonRes<List<SelectConcertRes>> selectConcert(
             @Schema(description = "대기열 토큰", defaultValue = "Bearer...") @RequestHeader("Authorization") String token
     ) {
-        List<SelectConcertRes> list = new ArrayList<>();
-        list.add(new SelectConcertRes(
-                1,
-                "2024 싸이 흠뻑쇼",
-                "2024-12-01",
-                "14:00",
-                "22:00",
-                true
-        ));
-        list.add(new SelectConcertRes(
-                2,
-                "2024 블랙핑크 콘서트",
-                "2024-12-02",
-                "14:00",
-                "22:00",
-                false
-        ));
-        return CommonRes.success(list);
+        List<SelectConcertResult> concertList = concertService.selectConcertList(token);
+        return CommonRes.success(SelectConcertRes.of(concertList));
     }
 
     @GetMapping("/seat")
@@ -58,13 +47,13 @@ public class ConcertController {
                 1,
                 1,
                 50000,
-                "AVAILABLE"
+                SeatStatus.AVAILABLE
         ));
         list.add(new SelectSeatRes(
                 2,
                 2,
                 30000,
-                "AVAILABLE"
+                SeatStatus.AVAILABLE
         ));
         return CommonRes.success(list);
     }

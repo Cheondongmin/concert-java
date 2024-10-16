@@ -1,6 +1,12 @@
 package com.hhplus.concert.core.interfaces.v1.concert.res;
 
+import com.hhplus.concert.core.domain.concert.SelectConcertResult;
+import com.hhplus.concert.core.domain.concert.TotalSeatStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 public record SelectConcertRes(
         @Schema(description = "스케쥴ID", defaultValue = "1")
@@ -14,6 +20,23 @@ public record SelectConcertRes(
         @Schema(description = "콘서트 종료 시간", defaultValue = "22:00")
         String endTime,
         @Schema(description = "콘서트 예약 가능 여부(좌석 매진 체크)", defaultValue = "true")
-        Boolean seatStatus
+        TotalSeatStatus seatStatus
 ) {
+    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+    public static List<SelectConcertRes> of(List<SelectConcertResult> resultList) {
+        List<SelectConcertRes> resList = new ArrayList<>();
+        for (SelectConcertResult result : resultList) {
+            resList.add(new SelectConcertRes(
+                    result.scheduleId(),
+                    result.concertTitle(),
+                    result.openDate().format(dateFormatter),
+                    result.startTime().format(dateTimeFormatter),
+                    result.endTime().format(dateTimeFormatter),
+                    result.seatStatus()
+            ));
+        }
+        return resList;
+    }
 }
