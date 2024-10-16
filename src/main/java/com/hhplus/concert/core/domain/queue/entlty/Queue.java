@@ -44,7 +44,7 @@ public class Queue {
         this.token = token;
         this.status = QueueStatus.WAITING;
         this.enteredDt = LocalDateTime.now();
-        this.expiredDt = null;
+        this.expiredDt = LocalDateTime.now().plusMinutes(5);
     }
 
     public Queue(Long userId, String token, QueueStatus status, LocalDateTime expiredDt) {
@@ -80,7 +80,7 @@ public class Queue {
                 .claim("userId", userId)
                 .claim("token", UUID.randomUUID().toString())
                 .claim("enteredDt", new Date())
-                .claim("expiredDt", new Date(System.currentTimeMillis() + 1800000)) // exp: 30분 후 만료
+                .claim("expiredDt", new Date(System.currentTimeMillis() + 300000)) // exp: 5분 후 만료
                 .compact();
     }
 

@@ -5,13 +5,10 @@ import com.hhplus.concert.core.domain.queue.entlty.QueueStatus;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
 
 import static com.hhplus.concert.fixture.queue.QueueFixture.신규유저_큐;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EnterQueueUnitTest {
     // 유저 대기열 토큰 발급 API 유닛 테스트 코드

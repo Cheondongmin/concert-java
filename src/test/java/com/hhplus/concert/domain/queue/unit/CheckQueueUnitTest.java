@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.hhplus.concert.fixture.queue.QueueFixture.신규유저_큐;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CheckQueueUnitTest {
