@@ -1,7 +1,4 @@
-package com.hhplus.concert.core.domain.queue.repository;
-
-import com.hhplus.concert.core.domain.queue.entlty.Queue;
-import com.hhplus.concert.core.domain.queue.entlty.QueueStatus;
+package com.hhplus.concert.core.domain.queue;
 
 import java.time.LocalDateTime;
 import java.util.List;

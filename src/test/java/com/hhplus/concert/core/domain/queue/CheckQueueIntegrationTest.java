@@ -1,12 +1,6 @@
-package com.hhplus.concert.domain.queue.integration;
+package com.hhplus.concert.core.domain.queue;
 
 import com.hhplus.concert.IntegrationTest;
-import com.hhplus.concert.core.domain.queue.dto.SelectQueueTokenResult;
-import com.hhplus.concert.core.domain.queue.entlty.Queue;
-import com.hhplus.concert.core.domain.queue.entlty.QueueStatus;
-import com.hhplus.concert.core.domain.queue.repository.QueueRepository;
-import com.hhplus.concert.core.domain.queue.service.QueueService;
-import com.hhplus.concert.core.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,15 +16,11 @@ public class CheckQueueIntegrationTest extends IntegrationTest {
     @Autowired
     private QueueRepository queueRepository;
 
-    @Autowired
-    private UserRepository userRepository;
 
     @Test
     void 유저가_대기열에서_진입_가능한_상태일_때_큐_상태가_변경된다() {
         // given
         Long userId = 1L;
-        // 먼저 User를 저장해야 함
-        userRepository.save(userId); // User 엔티티를 저장하는 코드가 필요
 
         Queue queue = new Queue(userId, "test-token", QueueStatus.WAITING, null);
         queueRepository.save(queue);  // DB에 대기열 정보 저장
@@ -56,13 +46,11 @@ public class CheckQueueIntegrationTest extends IntegrationTest {
         // 대기열이 30명 이상인 상황을 시뮬레이션
         for (int i = 1; i <= 30; i++) {
             Long userId = (long) i;
-            userRepository.save(userId); // User 엔티티를 저장하는 코드가 필요
             Queue otherQueue = new Queue(userId, "test-token-" + i, QueueStatus.WAITING, null);
             queueRepository.save(otherQueue);
         }
 
         Long userId = 31L;
-        userRepository.save(userId); // User 엔티티를 저장하는 코드가 필요
         Queue queue = new Queue(userId, "test-token-31", QueueStatus.WAITING, null);
         queueRepository.save(queue);
 

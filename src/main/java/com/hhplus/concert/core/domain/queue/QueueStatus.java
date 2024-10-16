@@ -1,4 +1,4 @@
-package com.hhplus.concert.core.domain.queue.entlty;
+package com.hhplus.concert.core.domain.queue;
 
 public enum QueueStatus {
     WAITING,

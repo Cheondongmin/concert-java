@@ -1,6 +1,6 @@
 package com.hhplus.concert.core.interfaces.v1.queue.res;
 
-import com.hhplus.concert.core.domain.queue.entlty.QueueStatus;
+import com.hhplus.concert.core.domain.queue.QueueStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record SelectQueueTokenRes(

@@ -1,4 +1,4 @@
-package com.hhplus.concert.core.domain.user.entlty;
+package com.hhplus.concert.core.domain.user;
 
 import io.jsonwebtoken.Jwts;
 import jakarta.persistence.*;

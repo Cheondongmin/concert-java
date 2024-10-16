@@ -1,10 +1,6 @@
-package com.hhplus.concert.domain.queue.integration;
+package com.hhplus.concert.core.domain.queue;
 
 import com.hhplus.concert.IntegrationTest;
-import com.hhplus.concert.core.domain.queue.entlty.Queue;
-import com.hhplus.concert.core.domain.queue.repository.QueueRepository;
-import com.hhplus.concert.core.domain.queue.service.QueueService;
-import com.hhplus.concert.core.domain.user.repository.UserRepository;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,16 +17,10 @@ public class EnterQueueIntegrationTest extends IntegrationTest {
     @Autowired
     private QueueRepository queueRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
     @Test
     void 대기열에_존재하지_않을경우_유저를_등록하고_대기열_토큰을_반환한다() {
         // given
         Long userId = 1L;
-
-        // 먼저 User를 저장해야 함
-        userRepository.save(userId); // User 엔티티를 저장하는 코드가 필요
 
         QueueService queueEnterService = new QueueService(queueRepository);
 
@@ -51,9 +41,6 @@ public class EnterQueueIntegrationTest extends IntegrationTest {
         String existQueueToken = "existQueueToken";
         QueueService queueEnterService = new QueueService(queueRepository);
         Long userId = 1L;
-
-        // 먼저 User를 저장해야 함
-        userRepository.save(userId); // User 엔티티를 저장하는 코드가 필요
 
         queueRepository.save(new Queue(userId, existQueueToken));
 

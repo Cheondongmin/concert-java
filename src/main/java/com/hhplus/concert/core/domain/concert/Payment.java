@@ -1,4 +1,4 @@
-package com.hhplus.concert.core.domain.concert.entlty;
+package com.hhplus.concert.core.domain.concert;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -12,28 +12,25 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PACKAGE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Table(name = "CONCERT_SEAT")
-public class ConcertSeat {
+@Table(name = "PAYMENT")
+public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "concert_schedule_id", nullable = false)
-    private Long concertScheduleId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
-    @Column(name = "amount", nullable = false)
-    private Integer amount;
+    @Column(name = "reservation_id", nullable = false)
+    private Long reservationId;
 
-    @Column(name = "position", nullable = false)
-    private Integer position;
+    @Column(name = "price", nullable = false)
+    private Long price;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "seat_status", nullable = false)
-    private SeatStatus seatStatus;
-
-    @Column(name = "reserved_until_dt")
-    private LocalDateTime reservedUntilDt;
+    @Column(name = "status", nullable = false)
+    private PaymentStatus status;
 
     @Column(name = "created_dt", nullable = false)
     private LocalDateTime createdDt;

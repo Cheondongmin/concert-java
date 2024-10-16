@@ -1,7 +1,7 @@
 package com.hhplus.concert.core.infrastructure.repository.queue.persistence;
 
-import com.hhplus.concert.core.domain.queue.entlty.Queue;
-import com.hhplus.concert.core.domain.queue.entlty.QueueStatus;
+import com.hhplus.concert.core.domain.queue.Queue;
+import com.hhplus.concert.core.domain.queue.QueueStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

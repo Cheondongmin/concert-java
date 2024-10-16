@@ -1,6 +1,6 @@
 package com.hhplus.concert.core.interfaces.v1.user;
 
-import com.hhplus.concert.core.domain.user.service.UserService;
+import com.hhplus.concert.core.domain.user.UserService;
 import com.hhplus.concert.core.interfaces.common.CommonRes;
 import com.hhplus.concert.core.interfaces.v1.user.req.UserAmountChargeReq;
 import com.hhplus.concert.core.interfaces.v1.user.res.SelectUserAmountRes;

@@ -1,12 +1,8 @@
-package com.hhplus.concert.domain.queue.unit;
+package com.hhplus.concert.core.domain.queue;
 
-import com.hhplus.concert.core.domain.queue.entlty.Queue;
-import com.hhplus.concert.core.domain.queue.entlty.QueueStatus;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-
-import static com.hhplus.concert.fixture.queue.QueueFixture.신규유저_큐;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -16,7 +12,7 @@ public class EnterQueueUnitTest {
     @Test
     void 토큰유효성검사_상태가Waiting이고_만료시간없음() {
         // given
-        Queue queue = 신규유저_큐(1L, QueueStatus.WAITING, null);
+        Queue queue = new Queue(1L, "test-token", QueueStatus.WAITING, null);
 
         // when
         boolean isValid = queue.isTokenValid();
@@ -28,7 +24,7 @@ public class EnterQueueUnitTest {
     @Test
     void 토큰유효성검사_상태가Waiting이고_만료시간이현재시간이후() {
         // given
-        Queue queue = 신규유저_큐(1L, QueueStatus.WAITING, LocalDateTime.now().plusMinutes(10));
+        Queue queue = new Queue(1L, "test-token" ,QueueStatus.WAITING, LocalDateTime.now().plusMinutes(10));
 
         // when
         boolean isValid = queue.isTokenValid();
@@ -40,7 +36,7 @@ public class EnterQueueUnitTest {
     @Test
     void 토큰유효성검사_상태가Waiting이고_만료시간이지났음() {
         // given
-        Queue queue = 신규유저_큐(1L, QueueStatus.WAITING, LocalDateTime.now().minusMinutes(10));
+        Queue queue = new Queue(1L, "test-token" ,QueueStatus.WAITING, LocalDateTime.now().minusMinutes(10));
         // when
         boolean isValid = queue.isTokenValid();
 
@@ -51,7 +47,7 @@ public class EnterQueueUnitTest {
     @Test
     void 토큰유효성검사_상태가Progress이고_만료시간없음() {
         // given
-        Queue queue = 신규유저_큐(1L, QueueStatus.PROGRESS, null);
+        Queue queue = new Queue(1L, "test-token", QueueStatus.PROGRESS, null);
 
         // when
         boolean isValid = queue.isTokenValid();
@@ -63,7 +59,7 @@ public class EnterQueueUnitTest {
     @Test
     void 토큰유효성검사_상태가Progress이고_만료시간이지났음() {
         // given
-        Queue queue = 신규유저_큐(1L, QueueStatus.PROGRESS, LocalDateTime.now().minusMinutes(10));
+        Queue queue = new Queue(1L, "test-token" ,QueueStatus.WAITING, LocalDateTime.now().minusMinutes(10));
 
         // when
         boolean isValid = queue.isTokenValid();
@@ -75,7 +71,7 @@ public class EnterQueueUnitTest {
     @Test
     void 토큰유효성검사_상태가Expired일경우() {
         // given
-        Queue queue = 신규유저_큐(1L, QueueStatus.EXPIRED, LocalDateTime.now().minusMinutes(10));
+        Queue queue = new Queue(1L, "test-token" ,QueueStatus.EXPIRED, LocalDateTime.now().minusMinutes(10));
 
         // when
         boolean isValid = queue.isTokenValid();

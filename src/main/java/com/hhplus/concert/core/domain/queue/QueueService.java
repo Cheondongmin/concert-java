@@ -1,9 +1,5 @@
-package com.hhplus.concert.core.domain.queue.service;
+package com.hhplus.concert.core.domain.queue;
 
-import com.hhplus.concert.core.domain.queue.dto.SelectQueueTokenResult;
-import com.hhplus.concert.core.domain.queue.entlty.Queue;
-import com.hhplus.concert.core.domain.queue.entlty.QueueStatus;
-import com.hhplus.concert.core.domain.queue.repository.QueueRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

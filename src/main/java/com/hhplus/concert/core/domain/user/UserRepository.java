@@ -1,6 +1,4 @@
-package com.hhplus.concert.core.domain.user.repository;
-
-import com.hhplus.concert.core.domain.user.entlty.Users;
+package com.hhplus.concert.core.domain.user;
 
 public interface UserRepository {
     void save(Long userId);

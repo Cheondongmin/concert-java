@@ -1,8 +1,8 @@
 package com.hhplus.concert.core.infrastructure.repository.queue.repository;
 
-import com.hhplus.concert.core.domain.queue.entlty.Queue;
-import com.hhplus.concert.core.domain.queue.entlty.QueueStatus;
-import com.hhplus.concert.core.domain.queue.repository.QueueRepository;
+import com.hhplus.concert.core.domain.queue.Queue;
+import com.hhplus.concert.core.domain.queue.QueueStatus;
+import com.hhplus.concert.core.domain.queue.QueueRepository;
 import com.hhplus.concert.core.infrastructure.repository.queue.persistence.QueueJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

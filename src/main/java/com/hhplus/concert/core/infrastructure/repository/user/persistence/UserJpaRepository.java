@@ -1,6 +1,6 @@
 package com.hhplus.concert.core.infrastructure.repository.user.persistence;
 
-import com.hhplus.concert.core.domain.user.entlty.Users;
+import com.hhplus.concert.core.domain.user.Users;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
