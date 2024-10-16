@@ -24,4 +24,15 @@ public interface QueueJpaRepository extends JpaRepository<Queue, Long> {
             @Param("enteredDt") LocalDateTime enteredDt,
             @Param("status") QueueStatus status
     );
+
+    @Query("""
+               SELECT q FROM Queue q
+               WHERE q.userId =:userId
+               AND (q.status = "WAITING" OR q.status = "PROGRESS")
+               ORDER BY q.enteredDt DESC
+               LIMIT 1
+            """)
+    Optional<Queue> findByUserIdForWaitingOrProgress(
+            @Param("userId") Long userId
+    );
 }

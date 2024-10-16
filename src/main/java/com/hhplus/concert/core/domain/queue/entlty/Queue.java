@@ -1,6 +1,6 @@
 package com.hhplus.concert.core.domain.queue.entlty;
 
-import com.hhplus.concert.core.domain.user.entlty.Users;
+import io.jsonwebtoken.Jwts;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,9 +23,8 @@ public class Queue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users users;
+    @Column(name = "user_id", nullable = false)
+    private long userId;
 
     @Column(name = "token", nullable = false)
     private String token;
@@ -40,7 +40,7 @@ public class Queue {
     private LocalDateTime expiredDt;
 
     public Queue(Long userId, String token) {
-        this.users = new Users(userId);
+        this.userId = userId;
         this.token = token;
         this.status = QueueStatus.WAITING;
         this.enteredDt = LocalDateTime.now();
@@ -48,7 +48,7 @@ public class Queue {
     }
 
     public Queue(Long userId, String token, QueueStatus status, LocalDateTime expiredDt) {
-        this.users = new Users(userId);
+        this.userId = userId;
         this.token = token;
         this.status = status;
         this.enteredDt = LocalDateTime.now();
@@ -71,12 +71,17 @@ public class Queue {
         if (existingQueue != null && existingQueue.isTokenValid()) {
             return existingQueue; // 기존 유효 토큰 반환
         }
-        return new Queue(userId, generateNewToken()); // 새 토큰 발급
+        return new Queue(userId, generateJwtToken(userId)); // 새 토큰 발급
     }
 
-    // 새로운 토큰 생성
-    private static String generateNewToken() {
-        return UUID.randomUUID().toString();
+    // JWT 토큰 생성
+    private static String generateJwtToken(Long userId) {
+        return Jwts.builder()
+                .claim("userId", userId)
+                .claim("token", UUID.randomUUID().toString())
+                .claim("enteredDt", new Date())
+                .claim("expiredDt", new Date(System.currentTimeMillis() + 1800000)) // exp: 30분 후 만료
+                .compact();
     }
 
     // 큐 체크 후 출입 여부 return
@@ -86,7 +91,7 @@ public class Queue {
             LocalDateTime expiredDt = LocalDateTime.now().plusMinutes(10);
 
             // 큐 진입 가능
-            return new Queue(queue.getUsers().getId(), queue.getToken(), QueueStatus.PROGRESS, expiredDt);
+            return new Queue(queue.getUserId(), queue.getToken(), QueueStatus.PROGRESS, expiredDt);
         } else {
             return queue;
         }

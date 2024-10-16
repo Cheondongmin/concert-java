@@ -17,7 +17,7 @@ public class QueueService {
 
     @Transactional
     public String enterQueue(Long userId) {
-        Queue existingQueue = queueRepository.findByUserId(userId);
+        Queue existingQueue = queueRepository.findByUserIdForWaitingOrProgress(userId);
 
         // 엔티티 체크 (유효성 검증에서 실패시 새로운 객체(토큰) 반환)
         Queue queue = Queue.enterQueue(existingQueue, userId);

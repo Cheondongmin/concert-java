@@ -1,5 +1,6 @@
 package com.hhplus.concert.core.domain.user.entlty;
 
+import io.jsonwebtoken.Jwts;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -45,5 +46,22 @@ public class Users {
     private static String generateRandomEmail() {
         String uuid = UUID.randomUUID().toString();
         return uuid + "@gmail.com"; // 랜덤 UUID 기반 이메일 생성
+    }
+
+    // jwt 토큰 파싱으로 userId 추출
+    public static Long extractUserIdFromJwt(String token) {
+        return Jwts.parserBuilder()
+                .build()
+                .parseClaimsJwt(token)
+                .getBody()
+                .get("userId", Long.class);
+    }
+
+    public void chargeAmount(Long amount) {
+        if(0 >= amount) {
+            throw new IllegalArgumentException("충전금액을 0 이상으로 설정해주세요.");
+        }
+
+        this.userAmount += amount;
     }
 }

@@ -17,8 +17,8 @@ public class QueueRepositoryImpl implements QueueRepository {
     private final QueueJpaRepository queueJpaRepository;
 
     @Override
-    public Queue findByUserId(Long userId) {
-        return queueJpaRepository.findById(userId)
+    public Queue findByUserIdForWaitingOrProgress(Long userId) {
+        return queueJpaRepository.findByUserIdForWaitingOrProgress(userId)
                 .orElse(null);
     }
 

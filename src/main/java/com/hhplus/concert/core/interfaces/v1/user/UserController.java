@@ -1,5 +1,6 @@
 package com.hhplus.concert.core.interfaces.v1.user;
 
+import com.hhplus.concert.core.domain.user.service.UserService;
 import com.hhplus.concert.core.interfaces.common.CommonRes;
 import com.hhplus.concert.core.interfaces.v1.user.req.UserAmountChargeReq;
 import com.hhplus.concert.core.interfaces.v1.user.res.SelectUserAmountRes;
@@ -16,17 +17,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/api/user")
 public class UserController {
 
+    private final UserService userService;
+
     @Operation(summary = "유저 요금 충전 API")
     @PostMapping("/amount")
     public CommonRes<UserAmountChargeRes> UserAmountCharge(
             @Schema(description = "대기열 토큰", defaultValue = "Bearer...") @RequestHeader("Authorization") String token,
             @RequestBody UserAmountChargeReq req
     ) {
-        return CommonRes.success(
-                new UserAmountChargeRes(
-                        50000
-                )
-        );
+        return CommonRes.success(new UserAmountChargeRes(userService.chargeUserAmount(token, req.amount())));
     }
 
     @Operation(summary = "유저 요금 조회 API")
@@ -34,10 +33,6 @@ public class UserController {
     public CommonRes<SelectUserAmountRes> selectUserAmount(
             @Schema(description = "대기열 토큰", defaultValue = "Bearer...") @RequestHeader("Authorization") String token
     ) {
-        return CommonRes.success(
-                new SelectUserAmountRes(
-                        50000
-                )
-        );
+        return CommonRes.success(new SelectUserAmountRes(userService.selectUserAmount(token)));
     }
 }
