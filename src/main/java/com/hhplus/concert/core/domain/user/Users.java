@@ -42,6 +42,15 @@ public class Users {
         this.isDelete = false;
     }
 
+    public Users(Long userId, Long userAmount) {
+        String randomEmail = generateRandomEmail();
+        this.id = userId;
+        this.userMail = randomEmail;
+        this.userAmount = userAmount;
+        this.createdDt = LocalDateTime.now();
+        this.isDelete = false;
+    }
+
     // 랜덤 이메일 생성 메서드
     private static String generateRandomEmail() {
         String uuid = UUID.randomUUID().toString();
@@ -57,7 +66,7 @@ public class Users {
                 .get("userId", Long.class);
     }
 
-    public void chargeAmount(Long amount) {
+    public void addAmount(Long amount) {
         if(0 >= amount) {
             throw new IllegalArgumentException("충전금액을 0 이상으로 설정해주세요.");
         }

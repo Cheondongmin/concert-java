@@ -1,7 +1,7 @@
 package com.hhplus.concert.core.domain.user;
 
 public interface UserRepository {
-    void save(Long userId);
+    void save(Users user);
 
     Users findById(long userId);
 

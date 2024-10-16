@@ -13,8 +13,8 @@ public class UserRepositoryImpl implements UserRepository {
     private final UserJpaRepository userJpaRepository;
 
     @Override
-    public void save(Long userId) {
-        userJpaRepository.save(new Users(userId));
+    public void save(Users user) {
+        userJpaRepository.save(user);
     }
 
     @Override

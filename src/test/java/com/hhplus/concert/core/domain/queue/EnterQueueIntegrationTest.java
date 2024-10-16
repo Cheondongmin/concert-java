@@ -17,15 +17,16 @@ public class EnterQueueIntegrationTest extends IntegrationTest {
     @Autowired
     private QueueRepository queueRepository;
 
+    @Autowired
+    private QueueService queueService;
+
     @Test
     void 대기열에_존재하지_않을경우_유저를_등록하고_대기열_토큰을_반환한다() {
         // given
         Long userId = 1L;
 
-        QueueService queueEnterService = new QueueService(queueRepository);
-
         // when
-        String queueToken = queueEnterService.enterQueue(userId);
+        String queueToken = queueService.enterQueue(userId);
 
         // then
         List<Queue> userQueues = queueRepository.findAll();
@@ -39,13 +40,12 @@ public class EnterQueueIntegrationTest extends IntegrationTest {
     void 대기열에_존재할_경우_기존_대기열_토큰을_반환한다() {
         // given
         String existQueueToken = "existQueueToken";
-        QueueService queueEnterService = new QueueService(queueRepository);
         Long userId = 1L;
 
         queueRepository.save(new Queue(userId, existQueueToken));
 
         // when
-        String queueToken = queueEnterService.enterQueue(userId);
+        String queueToken = queueService.enterQueue(userId);
 
         // then
         List<Queue> userQueues = queueRepository.findAll();

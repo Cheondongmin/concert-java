@@ -16,6 +16,8 @@ public class CheckQueueIntegrationTest extends IntegrationTest {
     @Autowired
     private QueueRepository queueRepository;
 
+    @Autowired
+    private QueueService queueService;
 
     @Test
     void 유저가_대기열에서_진입_가능한_상태일_때_큐_상태가_변경된다() {
@@ -29,10 +31,8 @@ public class CheckQueueIntegrationTest extends IntegrationTest {
         List<Queue> waitingQueueList = queueRepository.findOrderByDescByStatus(QueueStatus.WAITING);
         assertThat(waitingQueueList.size()).isLessThan(30); // 30명 미만인 상태 확인
 
-        QueueService queueEnterService = new QueueService(queueRepository);
-
         // when
-        SelectQueueTokenResult result = queueEnterService.checkQueue(queue.getToken());
+        SelectQueueTokenResult result = queueService.checkQueue(queue.getToken());
 
         assertAll(
                 () -> assertThat(result.status()).isEqualTo(QueueStatus.PROGRESS),
@@ -54,12 +54,10 @@ public class CheckQueueIntegrationTest extends IntegrationTest {
         Queue queue = new Queue(userId, "test-token-31", QueueStatus.WAITING, null);
         queueRepository.save(queue);
 
-        QueueService queueEnterService = new QueueService(queueRepository);
-
         // when
         // 대기열이 30명 이상인 상태를 시뮬레이션
         List<Queue> waitingQueueList = queueRepository.findOrderByDescByStatus(QueueStatus.WAITING);
-        SelectQueueTokenResult result = queueEnterService.checkQueue(queue.getToken());
+        SelectQueueTokenResult result = queueService.checkQueue(queue.getToken());
 
         // then
         assertAll(

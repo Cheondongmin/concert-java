@@ -21,7 +21,7 @@ public class UserService {
     public Long chargeUserAmount(String token, Long amount) {
         long userId = Users.extractUserIdFromJwt(token);
         Users user = userRepository.findByIdWithLock(userId);
-        user.chargeAmount(amount);
+        user.addAmount(amount);
         return user.getUserAmount();
     }
 }
