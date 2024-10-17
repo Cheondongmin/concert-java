@@ -24,4 +24,9 @@ public class ConcertScheduleRepositoryImpl implements ConcertScheduleRepository 
         return jpaRepository.findById(scheduleId).orElseThrow(
                 () -> new IllegalArgumentException("해당 아이디를 가진 콘서트 스케쥴이 존재하지 않습니다."));
     }
+
+    @Override
+    public void save(ConcertSchedule concertSchedule) {
+        jpaRepository.save(concertSchedule);
+    }
 }

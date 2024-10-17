@@ -80,4 +80,10 @@ public class Reservation {
     public static Reservation enterReservation(Users user, Concert concert, ConcertSeat concertSeat, ConcertSchedule concertSchedule) {
         return new Reservation(user.getId(), concertSeat.getId(), concert.getTitle(), concertSchedule.getOpenDt(), concertSchedule.getStartDt(), concertSchedule.getEndDt(), concertSeat.getAmount(), concertSeat.getPosition());
     }
+
+    public void finishReserve() {
+        if(this.status == ReservationStatus.TEMP_RESERVED) {
+            this.status = ReservationStatus.RESERVED;
+        }
+    }
 }

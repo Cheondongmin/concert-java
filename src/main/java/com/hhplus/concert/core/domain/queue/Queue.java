@@ -91,15 +91,18 @@ public class Queue {
     }
 
     // 큐 체크 후 출입 여부 return
-    public static Queue checkWatingQueue(List<Queue> queueList, Queue queue) {
-        if(queueList.size() < 30) {
+    public void checkWatingQueue(List<Queue> queueList) {
+        if(queueList.size() <= 30 && this.getStatus() == QueueStatus.WAITING) {
             // 10분 증가
             LocalDateTime expiredDt = LocalDateTime.now().plusMinutes(10);
 
             // 큐 진입 가능
-            return new Queue(queue.getUserId(), queue.getToken(), QueueStatus.PROGRESS, expiredDt);
+            this.status = QueueStatus.PROGRESS;
+            this.enteredDt  = expiredDt;
         } else {
-            return queue;
+            if(this.getStatus() == QueueStatus.EXPIRED) {
+                throw new IllegalArgumentException("대기열 상태가 활성상태가 아닙니다.");
+            }
         }
     }
 

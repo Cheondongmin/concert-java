@@ -44,6 +44,8 @@ public class ConcertSeat {
     public void isReserveCheck() {
         if(this.seatStatus != SeatStatus.AVAILABLE) {
             throw new IllegalArgumentException("해당 좌석은 예약할 수 없는 상태 입니다.");
+        } else {
+            this.seatStatus = SeatStatus.TEMP_RESERVED;
         }
     }
 

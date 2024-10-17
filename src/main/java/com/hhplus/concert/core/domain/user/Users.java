@@ -68,8 +68,7 @@ public class Users {
     public void checkConcertAmount(Long seatAmount) {
         if(this.userAmount < seatAmount) {
             throw new IllegalArgumentException("유저의 잔액이 부족합니다!");
-        } else {
-            this.userAmount -= seatAmount;
         }
+        this.userAmount -= seatAmount;
     }
 }

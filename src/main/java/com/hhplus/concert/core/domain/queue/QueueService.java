@@ -31,16 +31,13 @@ public class QueueService {
         List<Queue> watingQueueList = queueRepository.findOrderByDescByStatus(QueueStatus.WAITING);
 
         // 큐 체크 후 출입 여부 체크 후 상태변경 된 객체 return (출입 불가능이면 기존 queue return)
-        queue = Queue.checkWatingQueue(watingQueueList, queue);
+        queue.checkWatingQueue(watingQueueList);
 
         // 만약 상태가 WATING이면, 현재 포지션 가져오기
         if(queue.getStatus().equals(QueueStatus.WAITING)) {
             // 현재 유저의 뒤에 남아있는 대기열 + 1(자기 자신)
             queuePosition = queueRepository.findStatusIsWaitingAndAlreadyEnteredBy(queue.getEnteredDt(), QueueStatus.WAITING) + 1;
         }
-
-        // 변경되지 않은 엔티티는 업데이트 되지 않음.
-        queueRepository.save(queue);
 
         return new SelectQueueTokenResult(queuePosition, queue.getStatus());
     }

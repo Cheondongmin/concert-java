@@ -10,7 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
-class UsersChargeIntegrationTest extends IntegrationTest {
+class UsersIntegrationTest extends IntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
@@ -38,5 +38,21 @@ class UsersChargeIntegrationTest extends IntegrationTest {
         // then
         long amount = userService.selectUserAmount(useToken);
         assertThat(amount).isEqualTo(10000 + 1000 + 2000 + 3000);
+    }
+
+    @Test
+    void 유저가_잔액을_조회한다() {
+        // given
+        userRepository.save(new Users(1L, 1000L));
+
+        String useToken = "eyJhbGciOiJub25lIn0.eyJ1c2VySWQiOjEsInRva2VuIjoiMzc2NzcxMTctNzZjMy00NjdjLWFmMjEtOTY0ODI3Nzc3YTU3IiwiZW50ZXJlZER0IjoxNzI5MDY3NjIxMTIwLCJleHBpcmVkRHQiOjE3MjkwNjk0MjExMjB9.";
+
+        // when
+        userService.chargeUserAmount(useToken, 1000L);
+        userService.chargeUserAmount(useToken, 2000L);
+        long userAmount = userService.selectUserAmount(useToken);
+
+        // then
+        assertThat(userAmount).isEqualTo(4000L);
     }
 }

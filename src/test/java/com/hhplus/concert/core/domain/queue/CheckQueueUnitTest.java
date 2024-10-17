@@ -15,25 +15,25 @@ public class CheckQueueUnitTest {
     void 대기열이_30명_미만일_경우_상태가_PROGRESS로_변경된다() {
         // given
         Queue queue = new Queue(1L, "test-token", QueueStatus.WAITING, LocalDateTime.now().plusMinutes(10));
-        List<Queue> queueList = Collections.nCopies(29, queue); // 29명의 대기열을 생성
-
-        // when
-        Queue result = Queue.checkWatingQueue(queueList, queue);
-
-        // then
-        assertEquals(QueueStatus.PROGRESS, result.getStatus()); // 상태가 PROGRESS로 변경되어야 함
-    }
-
-    @Test
-    void 대기열이_30명_이상이면_상태가_변경되지_않는다() {
-        // given
-        Queue queue = new Queue(1L, "test-token", QueueStatus.WAITING, LocalDateTime.now().plusMinutes(10));
         List<Queue> queueList = Collections.nCopies(30, queue); // 30명의 대기열을 생성
 
         // when
-        Queue result = Queue.checkWatingQueue(queueList, queue);
+        queue.checkWatingQueue(queueList); // 상태가 내부에서 변경됨
 
         // then
-        assertEquals(QueueStatus.WAITING, result.getStatus()); // 상태가 그대로 WAITING이어야 함
+        assertEquals(QueueStatus.PROGRESS, queue.getStatus()); // 상태가 PROGRESS로 변경되어야 함
+    }
+
+    @Test
+    void 대기열이_30명_초과면_상태가_변경되지_않는다() {
+        // given
+        Queue queue = new Queue(1L, "test-token", QueueStatus.WAITING, LocalDateTime.now().plusMinutes(10));
+        List<Queue> queueList = Collections.nCopies(31, queue); // 31명의 대기열을 생성
+
+        // when
+        queue.checkWatingQueue(queueList); // 상태가 내부에서 변경됨
+
+        // then
+        assertEquals(QueueStatus.WAITING, queue.getStatus()); // 상태가 그대로 WAITING이어야 함
     }
 }

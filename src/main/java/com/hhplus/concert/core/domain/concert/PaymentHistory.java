@@ -22,7 +22,7 @@ public class PaymentHistory {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "payment_id", nullable = false)
+    @Column(name = "payment_id")
     private Long paymentId;
 
     @Column(name = "amount_change", nullable = false)

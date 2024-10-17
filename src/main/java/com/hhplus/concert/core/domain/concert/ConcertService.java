@@ -57,7 +57,6 @@ public class ConcertService {
         reservationRepository.save(reservation);
 
         Payment payment = Payment.enterPayment(userId, reservation.getId(), concertSeat.getAmount(), PaymentStatus.PROGRESS);
-
         paymentRepository.save(payment);
 
         return new ReserveConcertResult(reservation.getId(), reservation.getStatus(), reservation.getReservedDt(), reservation.getReservedUntilDt());
@@ -72,14 +71,14 @@ public class ConcertService {
         queue.tokenReserveCheck();
 
         Reservation reservation = reservationRepository.findById(reservationId);
-
         user.checkConcertAmount(reservation.getSeatAmount());
 
         // 비관적 락을 사용하여 좌석 조회 및 예약 처리
         ConcertSeat concertSeat = concertSeatRepository.findByIdWithLock(reservation.getSeatId());
         concertSeat.finishSeatReserve();
-
         queue.finishQueue();
+
+        reservation.finishReserve();
 
         Payment payment = paymentRepository.findByReservationId(reservation.getId());
         payment.finishPayment();

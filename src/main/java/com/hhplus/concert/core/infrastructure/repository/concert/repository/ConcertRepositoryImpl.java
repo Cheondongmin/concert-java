@@ -16,4 +16,9 @@ public class ConcertRepositoryImpl implements ConcertRepository {
         return jpaRepository.findById(concertId).orElseThrow(
                 () -> new IllegalArgumentException("해당 아이디를 가진 콘서트가 존재하지 않습니다."));
     }
+
+    @Override
+    public void save(Concert concert) {
+        jpaRepository.save(concert);
+    }
 }
