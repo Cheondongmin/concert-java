@@ -1,8 +1,6 @@
 package com.hhplus.concert.core.interfaces.v1.concert;
 
-import com.hhplus.concert.core.domain.concert.ConcertService;
-import com.hhplus.concert.core.domain.concert.SelectConcertResult;
-import com.hhplus.concert.core.domain.concert.SelectSeatResult;
+import com.hhplus.concert.core.domain.concert.*;
 import com.hhplus.concert.core.interfaces.common.CommonRes;
 import com.hhplus.concert.core.interfaces.v1.concert.req.PaymentConcertReq;
 import com.hhplus.concert.core.interfaces.v1.concert.req.ReserveConcertReq;
@@ -51,14 +49,8 @@ public class ConcertController {
             @Schema(description = "대기열 토큰", defaultValue = "Bearer...") @RequestHeader("Authorization") String token,
             @RequestBody ReserveConcertReq req
     ) {
-        return CommonRes.success(
-                new ReserveConcertRes(
-                        1234,
-                        "TEMP_RESERVED",
-                        "2024-10-09 20:00:00",
-                        "2024-10-09 20:05:00"
-                )
-        );
+        ReserveConcertResult reserveResult = concertService.reserveConcert(token, req.scheduleId(), req.seatId());
+        return CommonRes.success(ReserveConcertRes.of(reserveResult));
     }
 
     @PostMapping("/payment")
@@ -67,12 +59,7 @@ public class ConcertController {
             @Schema(description = "대기열 토큰", defaultValue = "Bearer...") @RequestHeader("Authorization") String token,
             @RequestBody PaymentConcertReq req
     ) {
-        return CommonRes.success(
-                new PaymentConcertRes(
-                        50000,
-                        "RESERVED",
-                        "DONE"
-                )
-        );
+        PaymentConcertResult paymentConcertResult = concertService.paymentConcert(token, req.reservationId());
+        return CommonRes.success(PaymentConcertRes.of(paymentConcertResult));
     }
 }

@@ -1,5 +1,6 @@
 package com.hhplus.concert.core.infrastructure.repository.concert.repository;
 
+import com.hhplus.concert.core.domain.concert.ConcertSeat;
 import com.hhplus.concert.core.domain.concert.ConcertSeatRepository;
 import com.hhplus.concert.core.domain.concert.SelectSeatResult;
 import com.hhplus.concert.core.infrastructure.repository.concert.persistence.ConcertSeatJpaRepository;
@@ -17,5 +18,11 @@ public class ConcertSeatRepositoryImpl implements ConcertSeatRepository {
     @Override
     public List<SelectSeatResult> findConcertSeat(long scheduleId) {
         return jpaRepository.findConcertSeat(scheduleId);
+    }
+
+    @Override
+    public ConcertSeat findByIdWithLock(long seatId) {
+        return jpaRepository.findByIdWithLock(seatId).orElseThrow(
+                () -> new RuntimeException("해당 정보를 가진 좌석을 조회할 수 없습니다."));
     }
 }

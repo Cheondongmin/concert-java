@@ -23,7 +23,7 @@ public class ConcertSeat {
     private Long concertScheduleId;
 
     @Column(name = "amount", nullable = false)
-    private Integer amount;
+    private Long amount;
 
     @Column(name = "position", nullable = false)
     private Integer position;
@@ -40,4 +40,14 @@ public class ConcertSeat {
 
     @Column(name = "is_delete", nullable = false)
     private Boolean isDelete = false;
+
+    public void isReserveCheck() {
+        if(this.seatStatus != SeatStatus.AVAILABLE) {
+            throw new IllegalArgumentException("해당 좌석은 예약할 수 없는 상태 입니다.");
+        }
+    }
+
+    public void finishSeatReserve() {
+        this.seatStatus = SeatStatus.RESERVED;
+    }
 }

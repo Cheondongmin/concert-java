@@ -1,5 +1,6 @@
 package com.hhplus.concert.core.domain.concert;
 
+import com.hhplus.concert.core.domain.user.Users;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -59,4 +60,24 @@ public class Reservation {
 
     @Column(name = "is_delete", nullable = false)
     private Boolean isDelete = false;
+
+    public Reservation(Long userId, Long seatId, String concertTitle, LocalDate concertOpenDt, LocalDateTime concertStartDt, LocalDateTime concertEndDt, Long seatAmount, Integer seatPosition) {
+        this.userId = userId;
+        this.seatId = seatId;
+        this.concertTitle = concertTitle;
+        this.concertOpenDt = concertOpenDt;
+        this.concertStartDt = concertStartDt;
+        this.concertEndDt = concertEndDt;
+        this.seatAmount = seatAmount;
+        this.seatPosition = seatPosition;
+        this.status = ReservationStatus.TEMP_RESERVED;
+        this.reservedDt = LocalDateTime.now();
+        this.reservedUntilDt = LocalDateTime.now().plusMinutes(5);
+        this.createdDt = LocalDateTime.now();
+        this.isDelete = false;
+    }
+
+    public static Reservation enterReservation(Users user, Concert concert, ConcertSeat concertSeat, ConcertSchedule concertSchedule) {
+        return new Reservation(user.getId(), concertSeat.getId(), concert.getTitle(), concertSchedule.getOpenDt(), concertSchedule.getStartDt(), concertSchedule.getEndDt(), concertSeat.getAmount(), concertSeat.getPosition());
+    }
 }

@@ -33,15 +33,6 @@ public class Users {
     @Column(name = "is_delete", nullable = false)
     private Boolean isDelete = false;
 
-    public Users(Long userId) {
-        String randomEmail = generateRandomEmail(); // 이메일 자동 생성
-        this.id = userId;
-        this.userMail = randomEmail;
-        this.userAmount = 0L;
-        this.createdDt = LocalDateTime.now();
-        this.isDelete = false;
-    }
-
     public Users(Long userId, Long userAmount) {
         String randomEmail = generateRandomEmail();
         this.id = userId;
@@ -72,5 +63,13 @@ public class Users {
         }
 
         this.userAmount += amount;
+    }
+
+    public void checkConcertAmount(Long seatAmount) {
+        if(this.userAmount < seatAmount) {
+            throw new IllegalArgumentException("유저의 잔액이 부족합니다!");
+        } else {
+            this.userAmount -= seatAmount;
+        }
     }
 }

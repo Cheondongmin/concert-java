@@ -37,4 +37,21 @@ public class Payment {
 
     @Column(name = "is_delete", nullable = false)
     private Boolean isDelete = false;
+
+    public Payment(long userId, long reservationId, long price, PaymentStatus status) {
+        this.userId = userId;
+        this.reservationId = reservationId;
+        this.price = price;
+        this.status = status;
+        this.createdDt = LocalDateTime.now();
+        this.isDelete = false;
+    }
+
+    public static Payment enterPayment(long userId, long reservationId, long price, PaymentStatus status) {
+        return new Payment(userId, reservationId, price,status);
+    }
+
+    public void finishPayment() {
+        this.status = PaymentStatus.DONE;
+    }
 }

@@ -66,6 +66,12 @@ public class Queue {
         return false; // 그 외의 경우 토큰은 유효하지 않음
     }
 
+    public void tokenReserveCheck() {
+        if(this.status != QueueStatus.PROGRESS) {
+            throw new IllegalArgumentException("정상적인 프로세스로 접근하지 않았습니다. 다시 대기열에 접근해주세요.");
+        }
+    }
+
     // 새로운 토큰을 발급하거나 기존 토큰을 반환하는 로직
     public static Queue enterQueue(Queue existingQueue, Long userId) {
         if (existingQueue != null && existingQueue.isTokenValid()) {
@@ -95,6 +101,10 @@ public class Queue {
         } else {
             return queue;
         }
+    }
+
+    public void finishQueue() {
+        this.status = QueueStatus.DONE;
     }
 }
 

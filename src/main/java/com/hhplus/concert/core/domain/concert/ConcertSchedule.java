@@ -47,4 +47,10 @@ public class ConcertSchedule {
 
     @Column(name = "is_delete", nullable = false)
     private Boolean isDelete = false;
+
+    public void isSoldOutCheck() {
+        if(this.totalSeatStatus != TotalSeatStatus.AVAILABLE) {
+            throw new IllegalArgumentException("죄송합니다. 해당 콘서트는 모든 좌석이 매진된 콘서트입니다.");
+        }
+    }
 }
