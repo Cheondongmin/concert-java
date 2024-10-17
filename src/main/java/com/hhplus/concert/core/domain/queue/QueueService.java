@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,5 +41,39 @@ public class QueueService {
         }
 
         return new SelectQueueTokenResult(queuePosition, queue.getStatus());
+    }
+
+    /**
+     * 토큰 만료 여부 조건일 경우 토큰 상태값을 업데이트 한다.
+     */
+    @Transactional
+    public void updateExpireConditionToken() {
+        queueRepository.updateExpireConditionToken();
+    }
+
+    /**
+     * 대기열에서 제한 인원에 허용하는 만큼 유저를 진입시킨다
+     */
+    @Transactional
+    public void periodicallyEnterUserQueue() {
+        // 현재 진행 중인 대기열의 수를 가져옵니다.
+        int currentQueueSize = queueRepository.countByStatus(QueueStatus.PROGRESS);
+
+        // 최대 대기열 수에서 현재 진행 중인 수를 빼서 남은 자리를 계산합니다.
+        int maxWaitingNumber = 30;
+        int remainingSlots = maxWaitingNumber - currentQueueSize;
+
+        if (remainingSlots > 0) {
+            // 남은 자리만큼의 대기 중인 유저를 가져옵니다.
+            List<Queue> waitingUserQueues = queueRepository.findTopNWaiting(remainingSlots);
+
+            if (!waitingUserQueues.isEmpty()) {
+                // 상태를 PROGRESS로 업데이트합니다.
+                queueRepository.updateStatusByIds(
+                        waitingUserQueues.stream().map(Queue::getId).collect(Collectors.toList()),
+                        QueueStatus.PROGRESS
+                );
+            }
+        }
     }
 }

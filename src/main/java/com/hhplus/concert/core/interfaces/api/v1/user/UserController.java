@@ -1,10 +1,10 @@
-package com.hhplus.concert.core.interfaces.v1.user;
+package com.hhplus.concert.core.interfaces.api.v1.user;
 
 import com.hhplus.concert.core.domain.user.UserService;
-import com.hhplus.concert.core.interfaces.common.CommonRes;
-import com.hhplus.concert.core.interfaces.v1.user.req.UserAmountChargeReq;
-import com.hhplus.concert.core.interfaces.v1.user.res.SelectUserAmountRes;
-import com.hhplus.concert.core.interfaces.v1.user.res.UserAmountChargeRes;
+import com.hhplus.concert.core.interfaces.api.common.CommonRes;
+import com.hhplus.concert.core.interfaces.api.v1.user.req.UserAmountChargeReq;
+import com.hhplus.concert.core.interfaces.api.v1.user.res.SelectUserAmountRes;
+import com.hhplus.concert.core.interfaces.api.v1.user.res.UserAmountChargeRes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;

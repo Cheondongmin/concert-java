@@ -14,37 +14,66 @@ import java.util.List;
 @RequiredArgsConstructor
 public class QueueRepositoryImpl implements QueueRepository {
 
-    private final QueueJpaRepository queueJpaRepository;
+    private final QueueJpaRepository jpaRepository;
 
     @Override
     public Queue findByUserIdForWaitingOrProgress(Long userId) {
-        return queueJpaRepository.findByUserIdForWaitingOrProgress(userId)
+        return jpaRepository.findByUserIdForWaitingOrProgress(userId)
                 .orElse(null);
     }
 
     @Override
     public void save(Queue queue) {
-        queueJpaRepository.save(queue);
+        jpaRepository.save(queue);
     }
 
     @Override
     public List<Queue> findAll() {
-        return queueJpaRepository.findAll();
+        return jpaRepository.findAll();
     }
 
     @Override
     public List<Queue> findOrderByDescByStatus(QueueStatus queueStatus) {
-        return queueJpaRepository.findAllByStatusOrderByIdDesc(queueStatus);
+        return jpaRepository.findAllByStatusOrderByIdDesc(queueStatus);
     }
 
     @Override
     public Queue findByToken(String token) {
-        return queueJpaRepository.findByToken(token)
+        return jpaRepository.findByToken(token)
                 .orElseThrow(() -> new IllegalArgumentException("해당 토큰의 큐가 존재하지 않습니다."));
     }
 
     @Override
     public Long findStatusIsWaitingAndAlreadyEnteredBy(LocalDateTime enteredDt, QueueStatus queueStatus) {
-        return queueJpaRepository.findStatusIsWaitingAndAlreadyEnteredBy(enteredDt, queueStatus);
+        return jpaRepository.findStatusIsWaitingAndAlreadyEnteredBy(enteredDt, queueStatus);
+    }
+
+    @Override
+    public void updateExpireConditionToken() {
+        jpaRepository.updateStatusExpire(
+                QueueStatus.EXPIRED,
+                QueueStatus.PROGRESS,
+                LocalDateTime.now()
+        );
+    }
+
+    @Override
+    public int countByStatus(QueueStatus queueStatus) {
+        return jpaRepository.countByStatus(queueStatus);
+    }
+
+    @Override
+    public List<Queue> findTopNWaiting(int remainingSlots) {
+        return jpaRepository.findTopNWaiting(QueueStatus.WAITING, remainingSlots);
+    }
+
+    @Override
+    public void updateStatusByIds(List<Long> collect, QueueStatus queueStatus) {
+        jpaRepository.updateStatusByIds(collect, queueStatus);
+    }
+
+    @Override
+    public List<Queue> findAllByStatusOrderByIdDesc(QueueStatus queueStatus) {
+        return jpaRepository.findAllByStatusOrderByIdDesc(queueStatus);
     }
 }

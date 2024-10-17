@@ -1,4 +1,4 @@
-package com.hhplus.concert.core.interfaces.v1.concert.res;
+package com.hhplus.concert.core.interfaces.api.v1.concert.res;
 
 import com.hhplus.concert.core.domain.concert.ReservationStatus;
 import com.hhplus.concert.core.domain.concert.ReserveConcertResult;

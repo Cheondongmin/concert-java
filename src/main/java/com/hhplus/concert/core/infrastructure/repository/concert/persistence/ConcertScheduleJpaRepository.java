@@ -30,4 +30,6 @@ public interface ConcertScheduleJpaRepository extends JpaRepository<ConcertSched
        """)
     List<SelectConcertResult> findConcertSchedule();
 
+    @Query("select cs.id from ConcertSchedule cs")
+    List<Long> findAllIds();
 }

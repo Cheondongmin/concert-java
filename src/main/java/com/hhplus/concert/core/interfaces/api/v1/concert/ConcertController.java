@@ -1,13 +1,13 @@
-package com.hhplus.concert.core.interfaces.v1.concert;
+package com.hhplus.concert.core.interfaces.api.v1.concert;
 
 import com.hhplus.concert.core.domain.concert.*;
-import com.hhplus.concert.core.interfaces.common.CommonRes;
-import com.hhplus.concert.core.interfaces.v1.concert.req.PaymentConcertReq;
-import com.hhplus.concert.core.interfaces.v1.concert.req.ReserveConcertReq;
-import com.hhplus.concert.core.interfaces.v1.concert.res.PaymentConcertRes;
-import com.hhplus.concert.core.interfaces.v1.concert.res.ReserveConcertRes;
-import com.hhplus.concert.core.interfaces.v1.concert.res.SelectConcertRes;
-import com.hhplus.concert.core.interfaces.v1.concert.res.SelectSeatRes;
+import com.hhplus.concert.core.interfaces.api.common.CommonRes;
+import com.hhplus.concert.core.interfaces.api.v1.concert.req.PaymentConcertReq;
+import com.hhplus.concert.core.interfaces.api.v1.concert.req.ReserveConcertReq;
+import com.hhplus.concert.core.interfaces.api.v1.concert.res.PaymentConcertRes;
+import com.hhplus.concert.core.interfaces.api.v1.concert.res.ReserveConcertRes;
+import com.hhplus.concert.core.interfaces.api.v1.concert.res.SelectConcertRes;
+import com.hhplus.concert.core.interfaces.api.v1.concert.res.SelectSeatRes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;

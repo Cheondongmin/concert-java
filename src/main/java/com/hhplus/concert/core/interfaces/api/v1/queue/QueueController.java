@@ -1,11 +1,11 @@
-package com.hhplus.concert.core.interfaces.v1.queue;
+package com.hhplus.concert.core.interfaces.api.v1.queue;
 
 import com.hhplus.concert.core.domain.queue.SelectQueueTokenResult;
 import com.hhplus.concert.core.domain.queue.QueueService;
-import com.hhplus.concert.core.interfaces.common.CommonRes;
-import com.hhplus.concert.core.interfaces.v1.queue.req.CreateQueueTokenReq;
-import com.hhplus.concert.core.interfaces.v1.queue.res.CreateQueueTokenRes;
-import com.hhplus.concert.core.interfaces.v1.queue.res.SelectQueueTokenRes;
+import com.hhplus.concert.core.interfaces.api.common.CommonRes;
+import com.hhplus.concert.core.interfaces.api.v1.queue.req.CreateQueueTokenReq;
+import com.hhplus.concert.core.interfaces.api.v1.queue.res.SelectQueueTokenRes;
+import com.hhplus.concert.core.interfaces.api.v1.queue.res.CreateQueueTokenRes;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;

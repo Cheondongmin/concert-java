@@ -1,4 +1,4 @@
-package com.hhplus.concert.core.interfaces.common;
+package com.hhplus.concert.core.interfaces.api.common;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
