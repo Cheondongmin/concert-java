@@ -38,6 +38,7 @@ dependencies {
 
 	// database
 	runtimeOnly 'com.h2database:h2'
+	implementation 'org.mariadb.jdbc:mariadb-java-client:3.4.1'
 
 	// test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -46,11 +47,16 @@ dependencies {
 	// gson
 	implementation 'com.google.code.gson:gson:2.8.9'
 
-	// mariadb
-	implementation 'org.mariadb.jdbc:mariadb-java-client:3.4.1'
-
 	// springDocs
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+
+	// Guava
+	implementation("com.google.guava:guava:33.0.0-jre")
+
+	// JWT
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // 필요한 경우 JSON 처리용
 }
 
 tasks.named('test') {

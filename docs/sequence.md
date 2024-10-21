@@ -17,7 +17,6 @@ sequenceDiagram
         waitingSystem -->> server: 신규 대기열 토큰 생성 및 반환
     end
     server -->> user: 대기열 토큰 반환
-
     rect rgba(0, 0, 255, .1)
         Note over QUEUE_SCHEDULER: 10초에 한번 호출
         QUEUE_SCHEDULER ->> QUEUE: 만료된 대기열 토큰 확인 (현재시간으로 부터 5분 이상 경과한 PROGRESS 상태)
@@ -181,7 +180,7 @@ sequenceDiagram
     actor 사용자 as 사용자
     participant API as API 서버
     participant AUTH as 토큰 인증 시스템
-    participant USER as USER 테이블
+    participant USERS as USERS 테이블
     participant PAYMENT_HISTORY as PAYMENT_HISTORY 테이블
 
     사용자 ->> API: 잔액 충전 API 요청
@@ -189,19 +188,19 @@ sequenceDiagram
     API ->> AUTH: 토큰 인증 요청
     AUTH -->> API: 토큰 인증 성공
 
-    API ->> USER: 잔액 충전 요청 (user_id, 충전 금액 포함)
-    USER ->> USER: 유저 존재 여부 확인 (user_id 확인)
+    API ->> USERS: 잔액 충전 요청 (user_id, 충전 금액 포함)
+    USERS ->> USERS: 유저 존재 여부 확인 (user_id 확인)
 
     alt 유저가 존재하지 않을 경우
-        USER -->> API: 에러 응답 (유저 없음)
+        USERS -->> API: 에러 응답 (유저 없음)
         API -->> 사용자: 에러 응답 (유저 없음)
     else 유저가 존재할 경우
-        USER ->> USER: 충전 금액이 0 이상인지 확인
+        USERS ->> USERS: 충전 금액이 0 이상인지 확인
         alt 충전 금액이 0 이하일 경우
-            USER -->> API: 에러 응답 (충전 금액이 0 이하)
+            USERS -->> API: 에러 응답 (충전 금액이 0 이하)
             API -->> 사용자: 에러 응답 (충전 금액이 0 이하)
         else 충전 금액이 0 이상일 경우
-            USER -->> API: 충전 성공 응답 (updated 잔액)
+            USERS -->> API: 충전 성공 응답 (updated 잔액)
             API ->> PAYMENT_HISTORY: 잔액 사용 내역 기록 요청 (user_id, amount_change, type: PAYMENT)
             PAYMENT_HISTORY -->> API: 기록 성공 응답
             API -->> 사용자: 충전 성공 응답 (updated 잔액)
@@ -217,21 +216,21 @@ sequenceDiagram
     actor 사용자 as 사용자
     participant API as API 서버
     participant AUTH as 토큰 인증 시스템
-    participant USER as USER 테이블
+    participant USERS as USERS 테이블
 
     사용자 ->> API: 잔액 조회 API 요청
     Note over 사용자, API: Authorization에 token 포함
     API ->> AUTH: 토큰 인증 요청
     AUTH -->> API: 토큰 인증 성공
 
-    API ->> USER: 잔액 조회 요청 (user_id 포함)
-    USER ->> USER: 유저 존재 여부 확인 (user_id 확인)
+    API ->> USERS: 잔액 조회 요청 (user_id 포함)
+    USERS ->> USERS: 유저 존재 여부 확인 (user_id 확인)
 
     alt 유저가 존재하지 않을 경우
-        USER -->> API: 에러 응답 (유저 없음)
+        USERS -->> API: 에러 응답 (유저 없음)
         API -->> 사용자: 에러 응답 (유저 없음)
     else 유저가 존재할 경우
-        USER -->> API: 잔액 반환 (amount)
+        USERS -->> API: 잔액 반환 (amount)
         API -->> 사용자: 잔액 응답 (amount)
     end
 ```
@@ -243,7 +242,7 @@ sequenceDiagram
     actor 사용자 as 사용자
     participant API as API 서버
     participant AUTH as 토큰 인증 시스템
-    participant USER as USER 테이블
+    participant USERS as USERS 테이블
     participant QUEUE as QUEUE 테이블
     participant CONCERT_SEAT as CONCERT_SEAT 테이블
     participant PAYMENT as PAYMENT 테이블
@@ -259,11 +258,11 @@ sequenceDiagram
     QUEUE -->> API: 대기열 상태 응답 (PROGRESS)
 
     alt 대기열 상태가 PROGRESS인 경우
-        API ->> USER: 잔액 확인 요청 (user_id 포함)
-        USER ->> USER: 유저 존재 여부 및 잔액 확인
+        API ->> USERS: 잔액 확인 요청 (user_id 포함)
+        USERS ->> USERS: 유저 존재 여부 및 잔액 확인
 
         alt 유저 잔액이 부족한 경우
-            USER -->> API: 에러 응답 (잔액 부족)
+            USERS -->> API: 에러 응답 (잔액 부족)
             API -->> 사용자: 에러 응답 (잔액 부족)
         else 유저 잔액이 충분한 경우
             PAYMENT ->> RESERVATION: 예약 상태 확인 (reservation_id 확인)
@@ -272,8 +271,8 @@ sequenceDiagram
                 PAYMENT -->> API: 에러 응답 (유효하지 않은 예약)
                 API -->> 사용자: 에러 응답 (유효하지 않은 예약)
             else 예약 상태가 유효한 경우
-                API ->> USER: 잔액 차감 요청 (user_id, 결제 금액 차감)
-                USER -->> API: 잔액 차감 완료
+                API ->> USERS: 잔액 차감 요청 (user_id, 결제 금액 차감)
+                USERS -->> API: 잔액 차감 완료
                 API ->> PAYMENT_HISTORY: 결제 내역 기록 (user_id, amount_change, type: PAYMENT)
                 PAYMENT_HISTORY -->> API: 기록 성공 응답
 

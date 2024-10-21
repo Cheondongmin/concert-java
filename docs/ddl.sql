@@ -1,131 +1,132 @@
--- USER 테이블: 유저 정보를 저장하는 테이블
-CREATE TABLE USER
+create table CONCERT
 (
-    id          BIGINT PRIMARY KEY COMMENT '유저 ID (PK)',
-    user_mail   VARCHAR(255) NOT NULL COMMENT '유저 메일',
-    user_amount BIGINT       NOT NULL COMMENT '잔액',
-    created_dt  DATETIME     NOT NULL COMMENT '생성 시간',
-    is_delete   BOOLEAN      NOT NULL DEFAULT FALSE COMMENT '삭제 여부 (Y, N)'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    id         bigint auto_increment comment '콘서트 ID (PK)'
+        primary key,
+    title      varchar(255) not null comment '콘서트 제목',
+    created_dt datetime     not null comment '생성 시간',
+    is_delete  tinyint(1) default 0 not null comment '삭제 여부 (Y, N)'
+);
 
--- QUEUE 테이블: 유저의 대기열 정보를 저장하는 테이블
-CREATE TABLE QUEUE
+create table CONCERT_SCHEDULE
 (
-    id         BIGINT PRIMARY KEY COMMENT '대기 번호 (PK)',
-    user_id    BIGINT       NOT NULL COMMENT '유저 ID (FK)',
-    token      VARCHAR(255) NOT NULL COMMENT '대기열 토큰',
-    status     ENUM('WAITING', 'PROGRESS', 'DONE', 'EXPIRED') NOT NULL COMMENT '대기열 상태',
-    entered_dt DATETIME     NOT NULL COMMENT '대기열 진입 시간',
-    expired_dt DATETIME DEFAULT NULL COMMENT '대기열 만료 시간',
-    CONSTRAINT fk_queue_user FOREIGN KEY (user_id) REFERENCES USER (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    id                bigint auto_increment comment '콘서트 일정 ID (PK)'
+        primary key,
+    concert_id        bigint   not null comment '콘서트 ID (FK)',
+    open_dt           date     not null comment '콘서트 개최 날짜',
+    start_dt          datetime not null comment '콘서트 시작 시간',
+    end_dt            datetime not null comment '콘서트 종료 시간',
+    total_seat        int      not null comment '전체 좌석 수',
+    reservation_seat  int      not null comment '남은 좌석 수',
+    total_seat_status enum ('SOLD_OUT', 'AVAILABLE') not null comment '전체 좌석 상태',
+    created_dt        datetime not null comment '생성 시간',
+    is_delete         tinyint(1) default 0           not null comment '삭제 여부 (Y, N)',
+    constraint fk_concert_schedule_concert
+        foreign key (concert_id) references CONCERT (id)
+            on update cascade on delete cascade
+);
 
--- CONCERT 테이블: 콘서트 정보를 저장하는 테이블
-CREATE TABLE CONCERT
+create table CONCERT_SEAT
 (
-    id         BIGINT PRIMARY KEY COMMENT '콘서트 ID (PK)',
-    title      VARCHAR(255) NOT NULL COMMENT '콘서트 제목',
-    created_dt DATETIME     NOT NULL COMMENT '생성 시간',
-    is_delete  BOOLEAN      NOT NULL DEFAULT FALSE COMMENT '삭제 여부 (Y, N)'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    id                  bigint auto_increment comment '좌석 ID (PK)'
+        primary key,
+    concert_schedule_id bigint   not null comment '콘서트 일정 ID (FK)',
+    amount              int      not null comment '좌석 금액',
+    position            int      not null comment '좌석 번호',
+    seat_status         enum ('AVAILABLE', 'TEMP_RESERVED', 'RESERVED') not null comment '좌석 상태',
+    reserved_until_dt   datetime null comment '임시 예약 만료 시간',
+    created_dt          datetime not null comment '생성 시간',
+    is_delete           tinyint(1) default 0                            not null comment '삭제 여부 (Y, N)',
+    constraint fk_concert_seat_schedule
+        foreign key (concert_schedule_id) references CONCERT_SCHEDULE (id)
+            on update cascade on delete cascade
+);
 
--- CONCERT_SCHEDULE 테이블: 콘서트 일정을 저장하는 테이블
-CREATE TABLE CONCERT_SCHEDULE
+create table USERS
 (
-    id                BIGINT PRIMARY KEY COMMENT '콘서트 일정 ID (PK)',
-    concert_id        BIGINT   NOT NULL COMMENT '콘서트 ID (FK)',
-    open_dt           DATE     NOT NULL COMMENT '콘서트 개최 날짜',
-    start_dt          DATETIME NOT NULL COMMENT '콘서트 시작 시간',
-    end_dt            DATETIME NOT NULL COMMENT '콘서트 종료 시간',
-    total_seat        INT      NOT NULL COMMENT '전체 좌석 수',
-    reservation_seat  INT      NOT NULL COMMENT '남은 좌석 수',
-    total_seat_status ENUM('SOLD_OUT', 'AVAILABLE') NOT NULL COMMENT '전체 좌석 상태',
-    created_dt        DATETIME NOT NULL COMMENT '생성 시간',
-    is_delete         BOOLEAN  NOT NULL DEFAULT FALSE COMMENT '삭제 여부 (Y, N)',
-    CONSTRAINT fk_concert_schedule_concert FOREIGN KEY (concert_id) REFERENCES CONCERT (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    id          bigint auto_increment comment '유저 ID (PK)'
+        primary key,
+    user_mail   varchar(255)                         not null comment '유저 메일',
+    user_amount bigint                               not null comment '잔액',
+    created_dt  datetime default current_timestamp() not null comment '생성 시간',
+    is_delete   tinyint(1) default 0                   not null comment '삭제 여부 (Y, N)'
+);
 
--- CONCERT_SEAT 테이블: 각 콘서트 일정의 좌석 정보를 저장하는 테이블
-CREATE TABLE CONCERT_SEAT
+create table QUEUE
 (
-    id                  BIGINT PRIMARY KEY COMMENT '좌석 ID (PK)',
-    concert_schedule_id BIGINT   NOT NULL COMMENT '콘서트 일정 ID (FK)',
-    amount              INT      NOT NULL COMMENT '좌석 금액',
-    position            INT      NOT NULL COMMENT '좌석 번호',
-    seat_status         ENUM('AVAILABLE', 'TEMP_RESERVED', 'RESERVED') NOT NULL COMMENT '좌석 상태',
-    reserved_until_dt   DATETIME          DEFAULT NULL COMMENT '임시 예약 만료 시간',
-    created_dt          DATETIME NOT NULL COMMENT '생성 시간',
-    is_delete           BOOLEAN  NOT NULL DEFAULT FALSE COMMENT '삭제 여부 (Y, N)',
-    CONSTRAINT fk_concert_seat_schedule FOREIGN KEY (concert_schedule_id) REFERENCES CONCERT_SCHEDULE (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    id         bigint auto_increment comment '대기 번호 (PK)'
+        primary key,
+    user_id    bigint       not null comment '유저 ID (FK)',
+    token      varchar(255) not null comment '대기열 토큰',
+    status     enum ('WAITING', 'PROGRESS', 'DONE', 'EXPIRED') not null comment '대기열 상태',
+    entered_dt datetime     not null comment '대기열 진입 시간',
+    expired_dt datetime null comment '대기열 만료 시간',
+    constraint fk_queue_user
+        foreign key (user_id) references USERS (id)
+            on update cascade on delete cascade
+);
 
--- RESERVATION 테이블: 예약 정보를 저장하는 테이블
-CREATE TABLE RESERVATION
+create table RESERVATION
 (
-    id                  BIGINT PRIMARY KEY COMMENT '예약 ID (PK)',
-    user_id             BIGINT       NOT NULL COMMENT '유저 ID (FK)',
-    concert_schedule_id BIGINT       NOT NULL COMMENT '콘서트 일정 ID (FK)',
-    seat_id             BIGINT       NOT NULL COMMENT '좌석 ID (FK)',
-    concert_title       VARCHAR(255) NOT NULL COMMENT '콘서트 제목',
-    concert_open_dt     DATE         NOT NULL COMMENT '콘서트 개최 날짜',
-    concert_start_dt    DATETIME     NOT NULL COMMENT '콘서트 시작 시간',
-    concert_end_dt      DATETIME     NOT NULL COMMENT '콘서트 종료 시간',
-    seat_amount         BIGINT       NOT NULL COMMENT '좌석 금액',
-    seat_position       INT          NOT NULL COMMENT '좌석 번호',
-    status              ENUM('TEMP_RESERVED', 'RESERVED', 'CANCELED') NOT NULL COMMENT '예약 상태',
-    reserved_dt         DATETIME     NOT NULL COMMENT '예약 시간',
-    reserved_until_dt   DATETIME              DEFAULT NULL COMMENT '예약 만료 시간',
-    created_dt          DATETIME     NOT NULL COMMENT '생성 시간',
-    is_delete           BOOLEAN      NOT NULL DEFAULT FALSE COMMENT '삭제 여부 (Y, N)',
-    CONSTRAINT fk_reservation_user FOREIGN KEY (user_id) REFERENCES USER (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    CONSTRAINT fk_reservation_schedule FOREIGN KEY (concert_schedule_id) REFERENCES CONCERT_SCHEDULE (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    CONSTRAINT fk_reservation_seat FOREIGN KEY (seat_id) REFERENCES CONCERT_SEAT (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    id                  bigint auto_increment comment '예약 ID (PK)'
+        primary key,
+    user_id             bigint       not null comment '유저 ID (FK)',
+    concert_schedule_id bigint       not null comment '콘서트 일정 ID (FK)',
+    seat_id             bigint       not null comment '좌석 ID (FK)',
+    concert_title       varchar(255) not null comment '콘서트 제목',
+    concert_open_dt     date         not null comment '콘서트 개최 날짜',
+    concert_start_dt    datetime     not null comment '콘서트 시작 시간',
+    concert_end_dt      datetime     not null comment '콘서트 종료 시간',
+    seat_amount         bigint       not null comment '좌석 금액',
+    seat_position       int          not null comment '좌석 번호',
+    status              enum ('TEMP_RESERVED', 'RESERVED', 'CANCELED') not null comment '예약 상태',
+    reserved_dt         datetime     not null comment '예약 시간',
+    reserved_until_dt   datetime null comment '예약 만료 시간',
+    created_dt          datetime     not null comment '생성 시간',
+    is_delete           tinyint(1) default 0                           not null comment '삭제 여부 (Y, N)',
+    constraint fk_reservation_schedule
+        foreign key (concert_schedule_id) references CONCERT_SCHEDULE (id)
+            on update cascade on delete cascade,
+    constraint fk_reservation_seat
+        foreign key (seat_id) references CONCERT_SEAT (id)
+            on update cascade on delete cascade,
+    constraint fk_reservation_user
+        foreign key (user_id) references USERS (id)
+            on update cascade on delete cascade
+);
 
--- PAYMENT 테이블: 결제 정보를 저장하는 테이블
-CREATE TABLE PAYMENT
+create table PAYMENT
 (
-    id             BIGINT PRIMARY KEY COMMENT '결제 번호 (PK)',
-    user_id        BIGINT   NOT NULL COMMENT '유저 ID (FK)',
-    reservation_id BIGINT   NOT NULL COMMENT '예약 ID (FK)',
-    price          BIGINT   NOT NULL COMMENT '결제 금액',
-    status         ENUM('PROGRESS', 'DONE', 'CANCELED') NOT NULL COMMENT '결제 상태',
-    created_dt     DATETIME NOT NULL COMMENT '결제 시간',
-    is_delete      BOOLEAN  NOT NULL DEFAULT FALSE COMMENT '삭제 여부 (Y, N)',
-    CONSTRAINT fk_payment_user FOREIGN KEY (user_id) REFERENCES USER (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    CONSTRAINT fk_payment_reservation FOREIGN KEY (reservation_id) REFERENCES RESERVATION (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    id             bigint auto_increment comment '결제 번호 (PK)'
+        primary key,
+    user_id        bigint   not null comment '유저 ID (FK)',
+    reservation_id bigint   not null comment '예약 ID (FK)',
+    price          bigint   not null comment '결제 금액',
+    status         enum ('PROGRESS', 'DONE', 'CANCELED') not null comment '결제 상태',
+    created_dt     datetime not null comment '결제 시간',
+    is_delete      tinyint(1) default 0                  not null comment '삭제 여부 (Y, N)',
+    constraint fk_payment_reservation
+        foreign key (reservation_id) references RESERVATION (id)
+            on update cascade on delete cascade,
+    constraint fk_payment_user
+        foreign key (user_id) references USERS (id)
+            on update cascade on delete cascade
+);
 
--- PAYMENT_HISTORY 테이블: 유저 금액 사용 내역을 저장하는 테이블
-CREATE TABLE PAYMENT_HISTORY
+create table PAYMENT_HISTORY
 (
-    id            BIGINT PRIMARY KEY COMMENT '금액 사용 내역 ID (PK)',
-    user_id       BIGINT   NOT NULL COMMENT '유저 ID (FK)',
-    payment_id    BIGINT   NOT NULL COMMENT '결제 ID (FK)',
-    amount_change INT      NOT NULL COMMENT '금액 변경',
-    type          ENUM('PAYMENT', 'REFUND') NOT NULL COMMENT '금액 사용 타입',
-    created_dt    DATETIME NOT NULL COMMENT '금액 변경 시간',
-    is_delete     BOOLEAN  NOT NULL DEFAULT FALSE COMMENT '삭제 여부 (Y, N)',
-    CONSTRAINT fk_payment_history_user FOREIGN KEY (user_id) REFERENCES USER (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    CONSTRAINT fk_payment_history_payment FOREIGN KEY (payment_id) REFERENCES PAYMENT (id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    id            bigint auto_increment comment '금액 사용 내역 ID (PK)'
+        primary key,
+    user_id       bigint   not null comment '유저 ID (FK)',
+    payment_id    bigint   not null comment '결제 ID (FK)',
+    amount_change int      not null comment '금액 변경',
+    type          enum ('PAYMENT', 'REFUND') not null comment '금액 사용 타입',
+    created_dt    datetime not null comment '금액 변경 시간',
+    is_delete     tinyint(1) default 0       not null comment '삭제 여부 (Y, N)',
+    constraint fk_payment_history_payment
+        foreign key (payment_id) references PAYMENT (id)
+            on update cascade on delete cascade,
+    constraint fk_payment_history_user
+        foreign key (user_id) references USERS (id)
+            on update cascade on delete cascade
+);
+
