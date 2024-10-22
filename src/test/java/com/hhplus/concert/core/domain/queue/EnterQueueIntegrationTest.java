@@ -1,6 +1,7 @@
 package com.hhplus.concert.core.domain.queue;
 
 import com.hhplus.concert.IntegrationTest;
+import com.hhplus.concert.core.interfaces.api.surppot.exception.ApiException;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,7 +123,7 @@ public class EnterQueueIntegrationTest extends IntegrationTest {
 
         // when & then: 상태가 만료(EXPIRED)된 유저가 접근하면 예외 발생
         assertThatThrownBy(() -> queueService.checkQueue(expiredQueue.getToken()))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ApiException.class)
                 .hasMessage("대기열 상태가 활성상태가 아닙니다.");
     }
 }

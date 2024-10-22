@@ -21,7 +21,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public Reservation findById(long reservationId) {
         return jpaRepository.findById(reservationId).orElseThrow(
-                () -> new IllegalArgumentException("해당 예약 정보가 존재하지 않습니다.")
+                () -> new NullPointerException("해당 예약 정보가 존재하지 않습니다.")
         );
     }
 

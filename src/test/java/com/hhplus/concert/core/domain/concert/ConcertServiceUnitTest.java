@@ -1,5 +1,6 @@
 package com.hhplus.concert.core.domain.concert;
 
+import com.hhplus.concert.core.interfaces.api.surppot.exception.ApiException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -35,7 +36,7 @@ public class ConcertServiceUnitTest {
         ConcertSchedule concertSchedule = new ConcertSchedule(1L, 1L, LocalDate.now(), LocalDateTime.now().plusHours(1), LocalDateTime.now().plusHours(3), 100, 0, TotalSeatStatus.SOLD_OUT, LocalDateTime.now(), false);
 
         // when & then
-        assertThrows(IllegalArgumentException.class, concertSchedule::isSoldOutCheck);
+        assertThrows(ApiException.class, concertSchedule::isSoldOutCheck);
     }
 
     @Test
@@ -53,7 +54,7 @@ public class ConcertServiceUnitTest {
         ConcertSeat concertSeat = new ConcertSeat(1L, 1L, 500L, 10, SeatStatus.RESERVED, null, LocalDateTime.now(), false);
 
         // when & then
-        assertThrows(IllegalArgumentException.class, concertSeat::isReserveCheck, "해당 좌석은 예약할 수 없는 상태 입니다.");
+        assertThrows(ApiException.class, concertSeat::isReserveCheck, "해당 좌석은 예약할 수 없는 상태 입니다.");
     }
 
     @Test
@@ -62,6 +63,6 @@ public class ConcertServiceUnitTest {
         ConcertSeat concertSeat = new ConcertSeat(1L, 1L, 500L, 10, SeatStatus.TEMP_RESERVED, null, LocalDateTime.now(), false);
 
         // when & then
-        assertThrows(IllegalArgumentException.class, concertSeat::isReserveCheck, "해당 좌석은 예약할 수 없는 상태 입니다.");
+        assertThrows(ApiException.class, concertSeat::isReserveCheck, "해당 좌석은 예약할 수 없는 상태 입니다.");
     }
 }

@@ -22,7 +22,7 @@ public class ConcertScheduleRepositoryImpl implements ConcertScheduleRepository 
     @Override
     public ConcertSchedule findById(long scheduleId) {
         return jpaRepository.findById(scheduleId).orElseThrow(
-                () -> new IllegalArgumentException("해당 아이디를 가진 콘서트 스케쥴이 존재하지 않습니다."));
+                () -> new NullPointerException("해당 아이디를 가진 콘서트 스케쥴이 존재하지 않습니다."));
     }
 
     @Override

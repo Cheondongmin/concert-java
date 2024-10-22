@@ -1,10 +1,13 @@
 package com.hhplus.concert.core.domain.concert;
 
+import com.hhplus.concert.core.interfaces.api.surppot.exception.ApiException;
+import com.hhplus.concert.core.interfaces.api.surppot.exception.ExceptionCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.boot.logging.LogLevel;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -50,7 +53,7 @@ public class ConcertSchedule {
 
     public void isSoldOutCheck() {
         if(this.totalSeatStatus != TotalSeatStatus.AVAILABLE) {
-            throw new IllegalArgumentException("죄송합니다. 해당 콘서트는 모든 좌석이 매진된 콘서트입니다.");
+            throw new ApiException(ExceptionCode.E002, LogLevel.INFO);
         }
     }
 }

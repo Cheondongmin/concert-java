@@ -21,7 +21,7 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     @Override
     public Payment findByReservationId(Long id) {
         return jpaRepository.findByReservationId(id).orElseThrow(
-                () -> new IllegalArgumentException("해당 예약 아이디의 결제정보가 존재하지 않습니다.")
+                () -> new NullPointerException("해당 예약 아이디의 결제정보가 존재하지 않습니다.")
         );
     }
 

@@ -1,5 +1,6 @@
 package com.hhplus.concert.core.domain.user;
 
+import com.hhplus.concert.core.interfaces.api.surppot.exception.ApiException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -25,7 +26,7 @@ class UsersUnitTest {
 
         // when & then
         assertThatThrownBy(() ->  user.checkConcertAmount(2000L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("유저의 잔액이 부족합니다!");
+                .isInstanceOf(ApiException.class)
+                .hasMessage("유저의 잔액이 부족합니다 잔액을 다시 확인해주세요!");
     }
 }

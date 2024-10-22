@@ -1,10 +1,13 @@
 package com.hhplus.concert.core.domain.concert;
 
+import com.hhplus.concert.core.interfaces.api.surppot.exception.ApiException;
+import com.hhplus.concert.core.interfaces.api.surppot.exception.ExceptionCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.boot.logging.LogLevel;
 
 import java.time.LocalDateTime;
 
@@ -43,7 +46,7 @@ public class ConcertSeat {
 
     public void isReserveCheck() {
         if(this.seatStatus != SeatStatus.AVAILABLE) {
-            throw new IllegalArgumentException("해당 좌석은 예약할 수 없는 상태 입니다.");
+            throw new ApiException(ExceptionCode.E004, LogLevel.ERROR);
         } else {
             this.seatStatus = SeatStatus.TEMP_RESERVED;
         }

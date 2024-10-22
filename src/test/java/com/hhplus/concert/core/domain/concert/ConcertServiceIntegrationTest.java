@@ -6,6 +6,7 @@ import com.hhplus.concert.core.domain.queue.QueueRepository;
 import com.hhplus.concert.core.domain.queue.QueueStatus;
 import com.hhplus.concert.core.domain.user.UserRepository;
 import com.hhplus.concert.core.domain.user.Users;
+import com.hhplus.concert.core.interfaces.api.surppot.exception.ApiException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -100,7 +101,7 @@ public class ConcertServiceIntegrationTest extends IntegrationTest {
 
         // when & then
         assertThatThrownBy(() -> concertService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId()))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ApiException.class)
                 .hasMessage("해당 좌석은 예약할 수 없는 상태 입니다.");
     }
 
@@ -123,7 +124,7 @@ public class ConcertServiceIntegrationTest extends IntegrationTest {
 
         // when & then
         assertThatThrownBy(() -> concertService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId()))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ApiException.class)
                 .hasMessage("죄송합니다. 해당 콘서트는 모든 좌석이 매진된 콘서트입니다.");
     }
 }

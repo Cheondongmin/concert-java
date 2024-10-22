@@ -1,11 +1,14 @@
 package com.hhplus.concert.core.domain.queue;
 
+import com.hhplus.concert.core.interfaces.api.surppot.exception.ApiException;
+import com.hhplus.concert.core.interfaces.api.surppot.exception.ExceptionCode;
 import io.jsonwebtoken.Jwts;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.boot.logging.LogLevel;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -68,7 +71,7 @@ public class Queue {
 
     public void tokenReserveCheck() {
         if(this.status != QueueStatus.PROGRESS) {
-            throw new IllegalArgumentException("정상적인 프로세스로 접근하지 않았습니다. 다시 대기열에 접근해주세요.");
+            throw new ApiException(ExceptionCode.E001, LogLevel.ERROR);
         }
     }
 
@@ -101,7 +104,7 @@ public class Queue {
             this.enteredDt  = expiredDt;
         } else {
             if(this.getStatus() == QueueStatus.EXPIRED) {
-                throw new IllegalArgumentException("대기열 상태가 활성상태가 아닙니다.");
+                throw new ApiException(ExceptionCode.E003, LogLevel.ERROR);
             }
         }
     }
