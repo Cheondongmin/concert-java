@@ -1,7 +1,7 @@
 package com.hhplus.concert.core.domain.concert;
 
-import com.hhplus.concert.core.interfaces.api.surppot.exception.ApiException;
-import com.hhplus.concert.core.interfaces.api.surppot.exception.ExceptionCode;
+import com.hhplus.concert.core.interfaces.api.support.exception.ApiException;
+import com.hhplus.concert.core.interfaces.api.support.exception.ExceptionCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

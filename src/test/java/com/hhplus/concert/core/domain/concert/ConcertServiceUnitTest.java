@@ -1,6 +1,6 @@
 package com.hhplus.concert.core.domain.concert;
 
-import com.hhplus.concert.core.interfaces.api.surppot.exception.ApiException;
+import com.hhplus.concert.core.interfaces.api.support.exception.ApiException;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;

@@ -1,4 +1,4 @@
-package com.hhplus.concert.core.interfaces.api.surppot.exception;
+package com.hhplus.concert.core.interfaces.api.support.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,10 +12,10 @@ public enum ExceptionCode {
     E004("004", "해당 좌석은 예약할 수 없는 상태 입니다."),
     E005("005", "유저의 잔액이 부족합니다 잔액을 다시 확인해주세요!"),
 
+    E403("403", "접근할 수 없습니다."),
     E404("404", "데이터를 조회할 수 없습니다."),
     E500("500", "알 수 없는 문제가 발생했습니다. 관리자에게 문의 부탁드립니다.");
 
     private final String code;
     private final String message;
-
 }

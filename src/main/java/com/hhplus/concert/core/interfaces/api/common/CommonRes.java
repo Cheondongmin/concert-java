@@ -1,7 +1,7 @@
 package com.hhplus.concert.core.interfaces.api.common;
 
-import com.hhplus.concert.core.interfaces.api.surppot.exception.ExceptionCode;
-import com.hhplus.concert.core.interfaces.api.surppot.exception.ExceptionMessage;
+import com.hhplus.concert.core.interfaces.api.support.exception.ExceptionCode;
+import com.hhplus.concert.core.interfaces.api.support.exception.ExceptionMessage;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.http.HttpStatus;
 

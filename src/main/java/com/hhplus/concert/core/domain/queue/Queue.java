@@ -1,7 +1,7 @@
 package com.hhplus.concert.core.domain.queue;
 
-import com.hhplus.concert.core.interfaces.api.surppot.exception.ApiException;
-import com.hhplus.concert.core.interfaces.api.surppot.exception.ExceptionCode;
+import com.hhplus.concert.core.interfaces.api.support.exception.ApiException;
+import com.hhplus.concert.core.interfaces.api.support.exception.ExceptionCode;
 import io.jsonwebtoken.Jwts;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.logging.LogLevel;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -94,7 +95,7 @@ public class Queue {
     }
 
     // 큐 체크 후 출입 여부 return
-    public void checkWatingQueue(List<Queue> queueList) {
+    public void checkWaitingQueue(List<Queue> queueList) {
         if(queueList.size() <= 30 && this.getStatus() == QueueStatus.WAITING) {
             // 10분 증가
             LocalDateTime expiredDt = LocalDateTime.now().plusMinutes(10);
@@ -111,6 +112,22 @@ public class Queue {
 
     public void finishQueue() {
         this.status = QueueStatus.DONE;
+    }
+
+    public static void tokenNullCheck(String token) {
+        if(!StringUtils.hasText(token)) {
+            throw new IllegalArgumentException("토큰이 존재하지 않습니다.");
+        }
+    }
+
+    public void checkToken() {
+        if(status != QueueStatus.PROGRESS) {
+            throw new ApiException(ExceptionCode.E403, LogLevel.WARN);
+        }
+
+        if(!this.expiredDt.isAfter(LocalDateTime.now())) {
+            throw new ApiException(ExceptionCode.E403, LogLevel.WARN);
+        }
     }
 }
 

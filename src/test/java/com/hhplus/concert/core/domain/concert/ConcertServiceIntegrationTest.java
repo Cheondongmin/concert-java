@@ -6,7 +6,7 @@ import com.hhplus.concert.core.domain.queue.QueueRepository;
 import com.hhplus.concert.core.domain.queue.QueueStatus;
 import com.hhplus.concert.core.domain.user.UserRepository;
 import com.hhplus.concert.core.domain.user.Users;
-import com.hhplus.concert.core.interfaces.api.surppot.exception.ApiException;
+import com.hhplus.concert.core.interfaces.api.support.exception.ApiException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
