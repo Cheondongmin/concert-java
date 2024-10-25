@@ -44,6 +44,20 @@ public class ConcertSeat {
     @Column(name = "is_delete", nullable = false)
     private Boolean isDelete = false;
 
+    @Version  // 낙관적 락을 위한 버전 필드
+    private int version;
+
+    public ConcertSeat(Long id, Long concertScheduleId, Long amount, Integer position, SeatStatus seatStatus, LocalDateTime reservedUntilDt, LocalDateTime createdDt, Boolean isDelete) {
+        this.id = id;
+        this.concertScheduleId = concertScheduleId;
+        this.amount = amount;
+        this.position = position;
+        this.seatStatus = seatStatus;
+        this.reservedUntilDt = reservedUntilDt;
+        this.createdDt = createdDt;
+        this.isDelete = isDelete;
+    }
+
     public void isReserveCheck() {
         if(this.seatStatus != SeatStatus.AVAILABLE) {
             throw new ApiException(ExceptionCode.E004, LogLevel.ERROR);

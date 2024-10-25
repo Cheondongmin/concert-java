@@ -5,6 +5,9 @@ import com.hhplus.concert.core.domain.queue.QueueRepository;
 import com.hhplus.concert.core.domain.user.UserRepository;
 import com.hhplus.concert.core.domain.user.Users;
 import lombok.RequiredArgsConstructor;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,9 +66,39 @@ public class ConcertService {
     }
 
     @Transactional
+    @Retryable(
+            retryFor = {ObjectOptimisticLockingFailureException.class},
+            maxAttempts = 10,
+            backoff = @Backoff(delay = 200)
+    )
+    public ReserveConcertResult reserveConcertWithOptimisticLock(String token, long scheduleId, long seatId) {
+        long userId = Users.extractUserIdFromJwt(token);
+        Users user = userRepository.findById(userId);
+
+        Queue queue = queueRepository.findByToken(token);
+        queue.tokenReserveCheck();
+
+        ConcertSchedule concertSchedule = concertScheduleRepository.findById(scheduleId);
+        concertSchedule.isSoldOutCheck();
+
+        // 낙관적 락을 사용하여 좌석 조회 및 예약 처리
+        ConcertSeat concertSeat = concertSeatRepository.findById(seatId);
+        concertSeat.isReserveCheck();
+
+        Concert concert = concertRepository.findById(concertSchedule.getConcertId());
+        Reservation reservation = Reservation.enterReservation(user, concert, concertSeat, concertSchedule);
+        reservationRepository.save(reservation);
+
+        Payment payment = Payment.enterPayment(userId, reservation.getId(), concertSeat.getAmount(), PaymentStatus.PROGRESS);
+        paymentRepository.save(payment);
+
+        return new ReserveConcertResult(reservation.getId(), reservation.getStatus(), reservation.getReservedDt(), reservation.getReservedUntilDt());
+    }
+
+    @Transactional
     public PaymentConcertResult paymentConcert(String token, long reservationId) {
         long userId = Users.extractUserIdFromJwt(token);
-        Users user = userRepository.findByIdWithLock(userId);
+        Users user = userRepository.findById(userId);
 
         Queue queue = queueRepository.findByToken(token);
         queue.tokenReserveCheck();
@@ -78,6 +111,38 @@ public class ConcertService {
         concertSeat.finishSeatReserve();
         queue.finishQueue();
 
+        reservation.finishReserve();
+
+        Payment payment = paymentRepository.findByReservationId(reservation.getId());
+        payment.finishPayment();
+
+        PaymentHistory paymentHistory = PaymentHistory.enterPaymentHistory(userId, payment.getPrice(), PaymentType.PAYMENT, payment.getId());
+        paymentHistoryRepository.save(paymentHistory);
+
+        return new PaymentConcertResult(concertSeat.getAmount(), reservation.getStatus(), queue.getStatus());
+    }
+
+    @Transactional
+    @Retryable(
+            retryFor = {ObjectOptimisticLockingFailureException.class},
+            maxAttempts = 10,
+            backoff = @Backoff(delay = 200)
+    )
+    public PaymentConcertResult paymentConcertWithOptimisticLock(String token, long reservationId) {
+        long userId = Users.extractUserIdFromJwt(token);
+        Users user = userRepository.findById(userId);
+
+        Queue queue = queueRepository.findByToken(token);
+        queue.tokenReserveCheck();
+
+        Reservation reservation = reservationRepository.findById(reservationId);
+        user.checkConcertAmount(reservation.getSeatAmount());
+
+        // 낙관적 락을 사용하여 좌석 조회 및 예약 처리
+        ConcertSeat concertSeat = concertSeatRepository.findById(reservation.getSeatId());
+        concertSeat.finishSeatReserve();
+
+        queue.finishQueue();
         reservation.finishReserve();
 
         Payment payment = paymentRepository.findByReservationId(reservation.getId());

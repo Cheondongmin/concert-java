@@ -59,7 +59,7 @@ public class ConcertController {
             @Schema(description = "대기열 토큰", defaultValue = "Bearer...") @RequestHeader("Authorization") String token,
             @RequestBody PaymentConcertReq req
     ) {
-        PaymentConcertResult paymentConcertResult = concertService.paymentConcert(token, req.reservationId());
+        PaymentConcertResult paymentConcertResult = concertService.paymentConcertWithOptimisticLock(token, req.reservationId());
         return CommonRes.success(PaymentConcertRes.of(paymentConcertResult));
     }
 }
