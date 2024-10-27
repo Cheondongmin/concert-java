@@ -1,4 +1,4 @@
-package com.hhplus.concert.core.domain.concert;
+package com.hhplus.concert.core.domain.reservation;
 
 public enum ReservationStatus {
     TEMP_RESERVED,

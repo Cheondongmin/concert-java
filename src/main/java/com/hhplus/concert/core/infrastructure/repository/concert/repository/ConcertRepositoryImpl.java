@@ -1,6 +1,9 @@
 package com.hhplus.concert.core.infrastructure.repository.concert.repository;
 
 import com.hhplus.concert.core.domain.concert.*;
+import com.hhplus.concert.core.domain.payment.PaymentStatus;
+import com.hhplus.concert.core.domain.reservation.Reservation;
+import com.hhplus.concert.core.domain.reservation.ReservationStatus;
 import com.hhplus.concert.core.infrastructure.repository.concert.persistence.ConcertJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

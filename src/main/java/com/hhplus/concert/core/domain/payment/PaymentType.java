@@ -1,4 +1,4 @@
-package com.hhplus.concert.core.domain.concert;
+package com.hhplus.concert.core.domain.payment;
 
 public enum PaymentType {
     PAYMENT,

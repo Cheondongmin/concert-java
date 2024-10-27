@@ -1,7 +1,7 @@
-package com.hhplus.concert.core.interfaces.api.v1.concert.res;
+package com.hhplus.concert.core.interfaces.api.v1.payment.res;
 
-import com.hhplus.concert.core.domain.concert.PaymentConcertResult;
-import com.hhplus.concert.core.domain.concert.ReservationStatus;
+import com.hhplus.concert.core.domain.payment.PaymentConcertResult;
+import com.hhplus.concert.core.domain.reservation.ReservationStatus;
 import com.hhplus.concert.core.domain.queue.QueueStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 

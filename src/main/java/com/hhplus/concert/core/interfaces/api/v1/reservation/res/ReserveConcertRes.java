@@ -1,7 +1,7 @@
-package com.hhplus.concert.core.interfaces.api.v1.concert.res;
+package com.hhplus.concert.core.interfaces.api.v1.reservation.res;
 
-import com.hhplus.concert.core.domain.concert.ReservationStatus;
-import com.hhplus.concert.core.domain.concert.ReserveConcertResult;
+import com.hhplus.concert.core.domain.reservation.ReservationStatus;
+import com.hhplus.concert.core.domain.reservation.ReserveConcertResult;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.format.DateTimeFormatter;

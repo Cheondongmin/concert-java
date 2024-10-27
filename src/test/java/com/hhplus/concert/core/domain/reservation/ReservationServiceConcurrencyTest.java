@@ -1,6 +1,10 @@
-package com.hhplus.concert.core.domain.concert;
+package com.hhplus.concert.core.domain.reservation;
 
 import com.hhplus.concert.IntegrationTest;
+import com.hhplus.concert.core.domain.concert.*;
+import com.hhplus.concert.core.domain.payment.Payment;
+import com.hhplus.concert.core.domain.payment.PaymentRepository;
+import com.hhplus.concert.core.domain.payment.PaymentService;
 import com.hhplus.concert.core.domain.queue.Queue;
 import com.hhplus.concert.core.domain.queue.QueueRepository;
 import com.hhplus.concert.core.domain.queue.QueueStatus;
@@ -21,7 +25,7 @@ import java.util.concurrent.Executors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-public class ConcertServiceConcurrencyTest extends IntegrationTest {
+public class ReservationServiceConcurrencyTest extends IntegrationTest {
 
     @Autowired
     private QueueRepository queueRepository;
@@ -45,7 +49,10 @@ public class ConcertServiceConcurrencyTest extends IntegrationTest {
     private PaymentRepository paymentRepository;
 
     @Autowired
-    private ConcertService concertService;
+    private ReservationService concertService;
+
+    @Autowired
+    private PaymentService paymentService;
 
     @Test
     void 좌석_임시예약_동시성_테스트() throws InterruptedException {
@@ -252,7 +259,7 @@ public class ConcertServiceConcurrencyTest extends IntegrationTest {
         for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
-                    concertService.paymentConcert(token, result.reservationId());
+                    paymentService.paymentConcert(token, result.reservationId());
                 } finally {
                     latch.countDown(); // 스레드가 종료되면 카운트 감소
                 }
@@ -302,7 +309,7 @@ public class ConcertServiceConcurrencyTest extends IntegrationTest {
         for (int i = 0; i < threadCount; i++) {
             executorService.submit(() -> {
                 try {
-                    concertService.paymentConcert(token, result.reservationId());
+                    paymentService.paymentConcert(token, result.reservationId());
                 } finally {
                     latch.countDown(); // 스레드가 종료되면 카운트 감소
                 }

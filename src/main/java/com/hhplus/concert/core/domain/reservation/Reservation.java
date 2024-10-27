@@ -1,5 +1,8 @@
-package com.hhplus.concert.core.domain.concert;
+package com.hhplus.concert.core.domain.reservation;
 
+import com.hhplus.concert.core.domain.concert.Concert;
+import com.hhplus.concert.core.domain.concert.ConcertSchedule;
+import com.hhplus.concert.core.domain.concert.ConcertSeat;
 import com.hhplus.concert.core.domain.user.Users;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

@@ -1,6 +1,6 @@
 package com.hhplus.concert.core.infrastructure.repository.concert.persistence;
 
-import com.hhplus.concert.core.domain.concert.Payment;
+import com.hhplus.concert.core.domain.payment.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
