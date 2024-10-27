@@ -18,7 +18,7 @@ public class CheckQueueUnitTest {
         List<Queue> queueList = Collections.nCopies(30, queue); // 30명의 대기열을 생성
 
         // when
-        queue.checkWatingQueue(queueList); // 상태가 내부에서 변경됨
+        queue.checkWaitingQueue(queueList); // 상태가 내부에서 변경됨
 
         // then
         assertEquals(QueueStatus.PROGRESS, queue.getStatus()); // 상태가 PROGRESS로 변경되어야 함
@@ -31,7 +31,7 @@ public class CheckQueueUnitTest {
         List<Queue> queueList = Collections.nCopies(31, queue); // 31명의 대기열을 생성
 
         // when
-        queue.checkWatingQueue(queueList); // 상태가 내부에서 변경됨
+        queue.checkWaitingQueue(queueList); // 상태가 내부에서 변경됨
 
         // then
         assertEquals(QueueStatus.WAITING, queue.getStatus()); // 상태가 그대로 WAITING이어야 함

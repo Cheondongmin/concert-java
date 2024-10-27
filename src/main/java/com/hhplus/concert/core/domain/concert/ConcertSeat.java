@@ -1,10 +1,13 @@
 package com.hhplus.concert.core.domain.concert;
 
+import com.hhplus.concert.core.interfaces.api.support.exception.ApiException;
+import com.hhplus.concert.core.interfaces.api.support.exception.ExceptionCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.boot.logging.LogLevel;
 
 import java.time.LocalDateTime;
 
@@ -41,9 +44,23 @@ public class ConcertSeat {
     @Column(name = "is_delete", nullable = false)
     private Boolean isDelete = false;
 
+    @Version  // 낙관적 락을 위한 버전 필드
+    private int version;
+
+    public ConcertSeat(Long id, Long concertScheduleId, Long amount, Integer position, SeatStatus seatStatus, LocalDateTime reservedUntilDt, LocalDateTime createdDt, Boolean isDelete) {
+        this.id = id;
+        this.concertScheduleId = concertScheduleId;
+        this.amount = amount;
+        this.position = position;
+        this.seatStatus = seatStatus;
+        this.reservedUntilDt = reservedUntilDt;
+        this.createdDt = createdDt;
+        this.isDelete = isDelete;
+    }
+
     public void isReserveCheck() {
         if(this.seatStatus != SeatStatus.AVAILABLE) {
-            throw new IllegalArgumentException("해당 좌석은 예약할 수 없는 상태 입니다.");
+            throw new ApiException(ExceptionCode.E004, LogLevel.ERROR);
         } else {
             this.seatStatus = SeatStatus.TEMP_RESERVED;
         }

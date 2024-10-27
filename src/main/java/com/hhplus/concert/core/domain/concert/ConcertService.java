@@ -1,7 +1,13 @@
 package com.hhplus.concert.core.domain.concert;
 
+import com.hhplus.concert.core.domain.payment.Payment;
+import com.hhplus.concert.core.domain.payment.PaymentRepository;
+import com.hhplus.concert.core.domain.payment.PaymentStatus;
 import com.hhplus.concert.core.domain.queue.Queue;
 import com.hhplus.concert.core.domain.queue.QueueRepository;
+import com.hhplus.concert.core.domain.reservation.Reservation;
+import com.hhplus.concert.core.domain.reservation.ReservationRepository;
+import com.hhplus.concert.core.domain.reservation.ReserveConcertResult;
 import com.hhplus.concert.core.domain.user.UserRepository;
 import com.hhplus.concert.core.domain.user.Users;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +27,6 @@ public class ConcertService {
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
     private final PaymentRepository paymentRepository;
-    private final PaymentHistoryRepository paymentHistoryRepository;
 
     @Transactional(readOnly = true)
     public List<SelectConcertResult> selectConcertList(String token) {
@@ -60,32 +65,5 @@ public class ConcertService {
         paymentRepository.save(payment);
 
         return new ReserveConcertResult(reservation.getId(), reservation.getStatus(), reservation.getReservedDt(), reservation.getReservedUntilDt());
-    }
-
-    @Transactional
-    public PaymentConcertResult paymentConcert(String token, long reservationId) {
-        long userId = Users.extractUserIdFromJwt(token);
-        Users user = userRepository.findByIdWithLock(userId);
-
-        Queue queue = queueRepository.findByToken(token);
-        queue.tokenReserveCheck();
-
-        Reservation reservation = reservationRepository.findById(reservationId);
-        user.checkConcertAmount(reservation.getSeatAmount());
-
-        // 비관적 락을 사용하여 좌석 조회 및 예약 처리
-        ConcertSeat concertSeat = concertSeatRepository.findByIdWithLock(reservation.getSeatId());
-        concertSeat.finishSeatReserve();
-        queue.finishQueue();
-
-        reservation.finishReserve();
-
-        Payment payment = paymentRepository.findByReservationId(reservation.getId());
-        payment.finishPayment();
-
-        PaymentHistory paymentHistory = PaymentHistory.enterPaymentHistory(userId, payment.getPrice(), PaymentType.PAYMENT, payment.getId());
-        paymentHistoryRepository.save(paymentHistory);
-
-        return new PaymentConcertResult(concertSeat.getAmount(), reservation.getStatus(), queue.getStatus());
     }
 }

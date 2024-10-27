@@ -1,6 +1,9 @@
 package com.hhplus.concert.core.infrastructure.repository.concert.repository;
 
 import com.hhplus.concert.core.domain.concert.*;
+import com.hhplus.concert.core.domain.payment.PaymentStatus;
+import com.hhplus.concert.core.domain.reservation.Reservation;
+import com.hhplus.concert.core.domain.reservation.ReservationStatus;
 import com.hhplus.concert.core.infrastructure.repository.concert.persistence.ConcertJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -16,7 +19,7 @@ public class ConcertRepositoryImpl implements ConcertRepository {
     @Override
     public Concert findById(Long concertId) {
         return jpaRepository.findById(concertId).orElseThrow(
-                () -> new IllegalArgumentException("해당 아이디를 가진 콘서트가 존재하지 않습니다."));
+                () -> new NullPointerException("해당 아이디를 가진 콘서트가 존재하지 않습니다."));
     }
 
     @Override

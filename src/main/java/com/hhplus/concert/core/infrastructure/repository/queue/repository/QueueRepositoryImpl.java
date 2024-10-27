@@ -40,7 +40,7 @@ public class QueueRepositoryImpl implements QueueRepository {
     @Override
     public Queue findByToken(String token) {
         return jpaRepository.findByToken(token)
-                .orElseThrow(() -> new IllegalArgumentException("해당 토큰의 큐가 존재하지 않습니다."));
+                .orElseThrow(() -> new NullPointerException("해당 토큰의 큐가 존재하지 않습니다."));
     }
 
     @Override

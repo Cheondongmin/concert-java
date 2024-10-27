@@ -1,8 +1,8 @@
 package com.hhplus.concert.core.domain.user;
 
-import com.hhplus.concert.core.domain.concert.PaymentHistory;
-import com.hhplus.concert.core.domain.concert.PaymentHistoryRepository;
-import com.hhplus.concert.core.domain.concert.PaymentType;
+import com.hhplus.concert.core.domain.payment.PaymentHistory;
+import com.hhplus.concert.core.domain.payment.PaymentHistoryRepository;
+import com.hhplus.concert.core.domain.payment.PaymentType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

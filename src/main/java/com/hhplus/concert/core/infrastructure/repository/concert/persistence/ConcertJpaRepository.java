@@ -1,9 +1,9 @@
 package com.hhplus.concert.core.infrastructure.repository.concert.persistence;
 
 import com.hhplus.concert.core.domain.concert.Concert;
-import com.hhplus.concert.core.domain.concert.PaymentStatus;
-import com.hhplus.concert.core.domain.concert.Reservation;
-import com.hhplus.concert.core.domain.concert.ReservationStatus;
+import com.hhplus.concert.core.domain.payment.PaymentStatus;
+import com.hhplus.concert.core.domain.reservation.Reservation;
+import com.hhplus.concert.core.domain.reservation.ReservationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

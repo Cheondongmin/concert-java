@@ -1,11 +1,9 @@
 package com.hhplus.concert.core.interfaces.api.v1.concert;
 
-import com.hhplus.concert.core.domain.concert.*;
+import com.hhplus.concert.core.domain.concert.ConcertService;
+import com.hhplus.concert.core.domain.concert.SelectConcertResult;
+import com.hhplus.concert.core.domain.concert.SelectSeatResult;
 import com.hhplus.concert.core.interfaces.api.common.CommonRes;
-import com.hhplus.concert.core.interfaces.api.v1.concert.req.PaymentConcertReq;
-import com.hhplus.concert.core.interfaces.api.v1.concert.req.ReserveConcertReq;
-import com.hhplus.concert.core.interfaces.api.v1.concert.res.PaymentConcertRes;
-import com.hhplus.concert.core.interfaces.api.v1.concert.res.ReserveConcertRes;
 import com.hhplus.concert.core.interfaces.api.v1.concert.res.SelectConcertRes;
 import com.hhplus.concert.core.interfaces.api.v1.concert.res.SelectSeatRes;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,25 +39,5 @@ public class ConcertController {
     ) {
         List<SelectSeatResult> seatList = concertService.selectConcertSeatList(token, scheduleId);
         return CommonRes.success(SelectSeatRes.of(seatList));
-    }
-
-    @PostMapping("/reserve")
-    @Operation(summary = "해당 콘서트 좌석 임시예약 (5분)")
-    public CommonRes<ReserveConcertRes> reserveConcert(
-            @Schema(description = "대기열 토큰", defaultValue = "Bearer...") @RequestHeader("Authorization") String token,
-            @RequestBody ReserveConcertReq req
-    ) {
-        ReserveConcertResult reserveResult = concertService.reserveConcert(token, req.scheduleId(), req.seatId());
-        return CommonRes.success(ReserveConcertRes.of(reserveResult));
-    }
-
-    @PostMapping("/payment")
-    @Operation(summary = "결제 완료 후 임시예약 -> 예약 전환")
-    public CommonRes<PaymentConcertRes> paymentConcert(
-            @Schema(description = "대기열 토큰", defaultValue = "Bearer...") @RequestHeader("Authorization") String token,
-            @RequestBody PaymentConcertReq req
-    ) {
-        PaymentConcertResult paymentConcertResult = concertService.paymentConcert(token, req.reservationId());
-        return CommonRes.success(PaymentConcertRes.of(paymentConcertResult));
     }
 }

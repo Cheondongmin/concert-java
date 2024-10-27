@@ -1,11 +1,14 @@
 package com.hhplus.concert.core.domain.user;
 
+import com.hhplus.concert.core.interfaces.api.support.exception.ApiException;
+import com.hhplus.concert.core.interfaces.api.support.exception.ExceptionCode;
 import io.jsonwebtoken.Jwts;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.boot.logging.LogLevel;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -67,7 +70,7 @@ public class Users {
 
     public void checkConcertAmount(Long seatAmount) {
         if(this.userAmount < seatAmount) {
-            throw new IllegalArgumentException("유저의 잔액이 부족합니다!");
+            throw new ApiException(ExceptionCode.E005, LogLevel.INFO);
         }
         this.userAmount -= seatAmount;
     }

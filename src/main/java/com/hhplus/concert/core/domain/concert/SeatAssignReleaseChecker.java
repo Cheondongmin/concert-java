@@ -1,5 +1,8 @@
 package com.hhplus.concert.core.domain.concert;
 
+import com.hhplus.concert.core.domain.payment.PaymentStatus;
+import com.hhplus.concert.core.domain.reservation.Reservation;
+import com.hhplus.concert.core.domain.reservation.ReservationStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

@@ -32,7 +32,7 @@ public class QueueService {
         List<Queue> watingQueueList = queueRepository.findOrderByDescByStatus(QueueStatus.WAITING);
 
         // 큐 체크 후 출입 여부 체크 후 상태변경 된 객체 return (출입 불가능이면 기존 queue return)
-        queue.checkWatingQueue(watingQueueList);
+        queue.checkWaitingQueue(watingQueueList);
 
         // 만약 상태가 WATING이면, 현재 포지션 가져오기
         if(queue.getStatus().equals(QueueStatus.WAITING)) {
