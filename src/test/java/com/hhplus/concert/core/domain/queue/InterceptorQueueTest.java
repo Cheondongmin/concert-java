@@ -1,7 +1,7 @@
 package com.hhplus.concert.core.domain.queue;
 
-import com.hhplus.concert.core.interfaces.api.support.exception.ApiException;
-import com.hhplus.concert.core.interfaces.api.support.exception.ExceptionCode;
+import com.hhplus.concert.core.interfaces.api.exception.ApiException;
+import com.hhplus.concert.core.interfaces.api.exception.ExceptionCode;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;

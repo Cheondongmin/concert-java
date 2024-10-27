@@ -1,8 +1,8 @@
 package com.hhplus.concert.core.interfaces.api.support;
 
 import com.hhplus.concert.core.interfaces.api.common.CommonRes;
-import com.hhplus.concert.core.interfaces.api.support.exception.ApiException;
-import com.hhplus.concert.core.interfaces.api.support.exception.ExceptionCode;
+import com.hhplus.concert.core.interfaces.api.exception.ApiException;
+import com.hhplus.concert.core.interfaces.api.exception.ExceptionCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

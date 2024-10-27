@@ -1,4 +1,4 @@
-package com.hhplus.concert.core.interfaces.api.support.exception;
+package com.hhplus.concert.core.interfaces.api.exception;
 
 import lombok.Getter;
 import org.springframework.boot.logging.LogLevel;

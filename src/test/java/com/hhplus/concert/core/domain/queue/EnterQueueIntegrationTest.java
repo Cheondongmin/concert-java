@@ -1,7 +1,7 @@
 package com.hhplus.concert.core.domain.queue;
 
 import com.hhplus.concert.IntegrationTest;
-import com.hhplus.concert.core.interfaces.api.support.exception.ApiException;
+import com.hhplus.concert.core.interfaces.api.exception.ApiException;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

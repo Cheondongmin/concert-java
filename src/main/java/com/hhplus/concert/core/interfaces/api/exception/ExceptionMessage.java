@@ -1,4 +1,4 @@
-package com.hhplus.concert.core.interfaces.api.support.exception;
+package com.hhplus.concert.core.interfaces.api.exception;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;

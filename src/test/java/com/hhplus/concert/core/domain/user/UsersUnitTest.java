@@ -1,6 +1,6 @@
 package com.hhplus.concert.core.domain.user;
 
-import com.hhplus.concert.core.interfaces.api.support.exception.ApiException;
+import com.hhplus.concert.core.interfaces.api.exception.ApiException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
