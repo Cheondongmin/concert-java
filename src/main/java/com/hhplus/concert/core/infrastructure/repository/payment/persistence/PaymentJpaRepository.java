@@ -1,4 +1,4 @@
-package com.hhplus.concert.core.infrastructure.repository.concert.persistence;
+package com.hhplus.concert.core.infrastructure.repository.payment.persistence;
 
 import com.hhplus.concert.core.domain.payment.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;

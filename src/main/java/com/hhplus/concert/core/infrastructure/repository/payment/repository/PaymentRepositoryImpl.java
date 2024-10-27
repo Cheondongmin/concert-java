@@ -1,8 +1,8 @@
-package com.hhplus.concert.core.infrastructure.repository.concert.repository;
+package com.hhplus.concert.core.infrastructure.repository.payment.repository;
 
 import com.hhplus.concert.core.domain.payment.Payment;
 import com.hhplus.concert.core.domain.payment.PaymentRepository;
-import com.hhplus.concert.core.infrastructure.repository.concert.persistence.PaymentJpaRepository;
+import com.hhplus.concert.core.infrastructure.repository.payment.persistence.PaymentJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 

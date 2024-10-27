@@ -1,8 +1,8 @@
-package com.hhplus.concert.core.infrastructure.repository.concert.repository;
+package com.hhplus.concert.core.infrastructure.repository.reservation.repository;
 
 import com.hhplus.concert.core.domain.reservation.Reservation;
 import com.hhplus.concert.core.domain.reservation.ReservationRepository;
-import com.hhplus.concert.core.infrastructure.repository.concert.persistence.ReservationJpaRepository;
+import com.hhplus.concert.core.infrastructure.repository.reservation.persistence.ReservationJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
