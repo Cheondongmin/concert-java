@@ -3,14 +3,14 @@ package com.hhplus.concert.core.interfaces.api.support;
 import com.hhplus.concert.core.interfaces.api.common.CommonRes;
 import com.hhplus.concert.core.interfaces.api.support.exception.ApiException;
 import com.hhplus.concert.core.interfaces.api.support.exception.ExceptionCode;
-import jakarta.security.auth.message.AuthException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @RestControllerAdvice
 @Slf4j
@@ -23,12 +23,8 @@ public class ApiControllerAdvice {
             default -> log.info("ApiException : {}", e.getMessage(), e);
         }
 
-        HttpStatus httpStatus;
-        switch (e.getExceptionCode().getCode()) {
-            case "403" -> httpStatus = FORBIDDEN;
-            case "404" -> httpStatus = NOT_FOUND;
-            default -> httpStatus = INTERNAL_SERVER_ERROR;
-        }
+        // ExceptionCode의 httpStatus를 직접 사용
+        HttpStatus httpStatus = e.getExceptionCode().getHttpStatus();
 
         return new ResponseEntity<>(CommonRes.error(e.getExceptionCode(), e.getData()), httpStatus);
     }
