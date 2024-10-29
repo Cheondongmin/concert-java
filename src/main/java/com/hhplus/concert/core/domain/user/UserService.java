@@ -4,6 +4,9 @@ import com.hhplus.concert.core.domain.payment.PaymentHistory;
 import com.hhplus.concert.core.domain.payment.PaymentHistoryRepository;
 import com.hhplus.concert.core.domain.payment.PaymentType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,21 @@ public class UserService {
     public Long chargeUserAmount(String token, Long amount) {
         long userId = Users.extractUserIdFromJwt(token);
         Users user = userRepository.findByIdWithLock(userId);
+        user.addAmount(amount);
+        PaymentHistory paymentHistory = PaymentHistory.enterPaymentHistory(user.getId(), amount, PaymentType.REFUND);
+        paymentHistoryRepository.save(paymentHistory);
+        return user.getUserAmount();
+    }
+
+    @Transactional
+    @Retryable(
+            retryFor = {ObjectOptimisticLockingFailureException.class},
+            maxAttempts = 10,
+            backoff = @Backoff(delay = 200)
+    )
+    public Long chargeUserAmountOptimisticLock(String token, Long amount) {
+        long userId = Users.extractUserIdFromJwt(token);
+        Users user = userRepository.findById(userId);
         user.addAmount(amount);
         PaymentHistory paymentHistory = PaymentHistory.enterPaymentHistory(user.getId(), amount, PaymentType.REFUND);
         paymentHistoryRepository.save(paymentHistory);
