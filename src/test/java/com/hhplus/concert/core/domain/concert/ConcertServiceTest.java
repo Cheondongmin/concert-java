@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SpringBootTest
-public class ConcertServiceIntegrationTest extends IntegrationTest {
+public class ConcertServiceTest extends IntegrationTest {
 
     @Autowired
     private QueueRepository queueRepository;
@@ -55,9 +55,7 @@ public class ConcertServiceIntegrationTest extends IntegrationTest {
         concertSeatRepository.save(concertSeat);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId()))
-                .isInstanceOf(ApiException.class)
-                .hasMessage("해당 좌석은 예약할 수 없는 상태 입니다.");
+        assertThatThrownBy(() -> reservationService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId())).isInstanceOf(ApiException.class).hasMessage("해당 좌석은 예약할 수 없는 상태 입니다.");
     }
 
     @Test
@@ -78,8 +76,6 @@ public class ConcertServiceIntegrationTest extends IntegrationTest {
         concertSeatRepository.save(concertSeat);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId()))
-                .isInstanceOf(ApiException.class)
-                .hasMessage("죄송합니다. 해당 콘서트는 모든 좌석이 매진된 콘서트입니다.");
+        assertThatThrownBy(() -> reservationService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId())).isInstanceOf(ApiException.class).hasMessage("죄송합니다. 해당 콘서트는 모든 좌석이 매진된 콘서트입니다.");
     }
 }

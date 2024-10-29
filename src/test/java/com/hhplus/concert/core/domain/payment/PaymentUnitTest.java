@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PaymentServiceUnitTest {
+public class PaymentUnitTest {
 
     @Test
     void 결제를_진행한다() {

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ConcertServiceUnitTest {
+public class ConcertUnitTest {
 
     @Test
     void 콘서트가_매진되어_예약할_수_없다() {
