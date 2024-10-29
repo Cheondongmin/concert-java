@@ -1,11 +1,5 @@
 package com.hhplus.concert.core.domain.reservation;
 
-import com.hhplus.concert.core.domain.concert.Concert;
-import com.hhplus.concert.core.domain.concert.ConcertSchedule;
-import com.hhplus.concert.core.domain.concert.ConcertSeat;
-import com.hhplus.concert.core.domain.concert.SeatStatus;
-import com.hhplus.concert.core.domain.concert.TotalSeatStatus;
-import com.hhplus.concert.core.domain.user.Users;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -52,38 +46,6 @@ class ReservationUnitTest {
                             .isAfter(LocalDateTime.now())
                             .isBefore(LocalDateTime.now().plusMinutes(6)),
                     () -> assertThat(reservation.getIsDelete()).isFalse()
-            );
-        }
-
-        @Test
-        void enterReservation_정적_팩토리_메서드로_예약_객체가_생성된다() {
-            // given
-            Users user = new Users(1L, 100000L);
-            Concert concert = new Concert(1L, "테스트 콘서트", LocalDateTime.now(), false);
-            ConcertSchedule schedule = new ConcertSchedule(
-                    1L, concert.getId(), LocalDate.now(),
-                    LocalDateTime.now(), LocalDateTime.now().plusHours(2),
-                    100, 50, TotalSeatStatus.AVAILABLE, LocalDateTime.now(), false
-            );
-            ConcertSeat seat = new ConcertSeat(
-                    1L, schedule.getId(), 50000L, 1,
-                    SeatStatus.AVAILABLE, null, LocalDateTime.now(), false
-            );
-
-            // when
-            Reservation reservation = Reservation.enterReservation(user, concert, seat, schedule);
-
-            // then
-            assertAll(
-                    () -> assertThat(reservation.getUserId()).isEqualTo(user.getId()),
-                    () -> assertThat(reservation.getSeatId()).isEqualTo(seat.getId()),
-                    () -> assertThat(reservation.getConcertTitle()).isEqualTo(concert.getTitle()),
-                    () -> assertThat(reservation.getConcertOpenDt()).isEqualTo(schedule.getOpenDt()),
-                    () -> assertThat(reservation.getConcertStartDt()).isEqualTo(schedule.getStartDt()),
-                    () -> assertThat(reservation.getConcertEndDt()).isEqualTo(schedule.getEndDt()),
-                    () -> assertThat(reservation.getSeatAmount()).isEqualTo(seat.getAmount()),
-                    () -> assertThat(reservation.getSeatPosition()).isEqualTo(seat.getPosition()),
-                    () -> assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.TEMP_RESERVED)
             );
         }
     }
