@@ -5,10 +5,7 @@ import com.hhplus.concert.core.domain.concert.*;
 import com.hhplus.concert.core.domain.queue.Queue;
 import com.hhplus.concert.core.domain.queue.QueueRepository;
 import com.hhplus.concert.core.domain.queue.QueueStatus;
-import com.hhplus.concert.core.domain.reservation.Reservation;
-import com.hhplus.concert.core.domain.reservation.ReservationRepository;
-import com.hhplus.concert.core.domain.reservation.ReservationStatus;
-import com.hhplus.concert.core.domain.reservation.ReserveConcertResult;
+import com.hhplus.concert.core.domain.reservation.*;
 import com.hhplus.concert.core.domain.user.UserRepository;
 import com.hhplus.concert.core.domain.user.Users;
 import org.junit.jupiter.api.Test;
@@ -43,10 +40,10 @@ public class PaymentServiceIntegrationTest extends IntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
-    private ConcertService concertService;
+    private PaymentService paymentService;
 
     @Autowired
-    private PaymentService paymentService;
+    private ReservationService reservationService;
 
     @Test
     void 결제를_진행하고_잔액과_좌석상태가_변경된다() {
@@ -67,7 +64,7 @@ public class PaymentServiceIntegrationTest extends IntegrationTest {
 
         // when
         // 예약 진행
-        ReserveConcertResult reserveResult = concertService.reserveConcert(queue.getToken(), concertSchedule.getId(), concertSeat.getId());
+        ReserveConcertResult reserveResult = reservationService.reserveConcert(queue.getToken(), concertSchedule.getId(), concertSeat.getId());
 
         // then (예약 완료 확인)
         Reservation reservation = reservationRepository.findById(reserveResult.reservationId());

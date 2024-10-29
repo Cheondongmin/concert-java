@@ -4,6 +4,7 @@ import com.hhplus.concert.IntegrationTest;
 import com.hhplus.concert.core.domain.queue.Queue;
 import com.hhplus.concert.core.domain.queue.QueueRepository;
 import com.hhplus.concert.core.domain.queue.QueueStatus;
+import com.hhplus.concert.core.domain.reservation.ReservationService;
 import com.hhplus.concert.core.domain.user.UserRepository;
 import com.hhplus.concert.core.domain.user.Users;
 import com.hhplus.concert.core.interfaces.api.exception.ApiException;
@@ -34,7 +35,7 @@ public class ConcertServiceIntegrationTest extends IntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
-    private ConcertService concertService;
+    private ReservationService reservationService;
 
     @Test
     void 콘서트_스케줄의_날짜의_좌석이_임시예약_혹은_예약된_상태인_경우_예외가_발생한다() {
@@ -54,7 +55,7 @@ public class ConcertServiceIntegrationTest extends IntegrationTest {
         concertSeatRepository.save(concertSeat);
 
         // when & then
-        assertThatThrownBy(() -> concertService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId()))
+        assertThatThrownBy(() -> reservationService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId()))
                 .isInstanceOf(ApiException.class)
                 .hasMessage("해당 좌석은 예약할 수 없는 상태 입니다.");
     }
@@ -77,7 +78,7 @@ public class ConcertServiceIntegrationTest extends IntegrationTest {
         concertSeatRepository.save(concertSeat);
 
         // when & then
-        assertThatThrownBy(() -> concertService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId()))
+        assertThatThrownBy(() -> reservationService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId()))
                 .isInstanceOf(ApiException.class)
                 .hasMessage("죄송합니다. 해당 콘서트는 모든 좌석이 매진된 콘서트입니다.");
     }

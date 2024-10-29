@@ -44,9 +44,6 @@ public class PaymentServiceConcurrencyTest extends IntegrationTest {
     private PaymentRepository paymentRepository;
 
     @Autowired
-    private ConcertService concertService;
-
-    @Autowired
     private PaymentService paymentService;
 
     @Autowired
@@ -70,7 +67,7 @@ public class PaymentServiceConcurrencyTest extends IntegrationTest {
         concertSeatRepository.save(concertSeat);
 
         // 예약 생성 및 저장
-        ReserveConcertResult result = concertService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId());
+        ReserveConcertResult result = reservationService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId());
 
         // 동시성 제어를 위한 ExecutorService 설정
         int threadCount = 10; // 동일한 유저가 10번 결제 요청
