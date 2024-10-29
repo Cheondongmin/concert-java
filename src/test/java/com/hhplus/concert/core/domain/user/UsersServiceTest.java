@@ -5,9 +5,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import java.util.concurrent.CompletableFuture;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
@@ -41,6 +39,30 @@ class UsersServiceTest extends IntegrationTest {
             // then: 10000 + 1000 + 2000 + 3000 = 16000
             long amount = userService.selectUserAmount(TEST_TOKEN);
             assertThat(amount).isEqualTo(16000L);
+        }
+
+        @Test
+        void 잔액이_1만원인_유저가_100번_동시에_충전요청을_보낸다() throws InterruptedException {
+            // given
+            Users user = new Users(1L, 10000L);
+            userRepository.save(user);
+            int numberOfRequests = 100;
+            Long chargeAmount = 1000L;
+
+            // when: 100번의 동시 충전 요청
+            CompletableFuture<Void>[] futures = new CompletableFuture[numberOfRequests];
+            for(int i = 0; i < numberOfRequests; i++) {
+                futures[i] = CompletableFuture.runAsync(() -> {
+                    userService.chargeUserAmountOptimisticLock(TEST_TOKEN, chargeAmount);
+                });
+            }
+
+            CompletableFuture.allOf(futures).join();
+
+            // then: 10000 + (1000 * 100) = 110000
+            Thread.sleep(100); // 모든 트랜잭션이 완료될 때까지 잠시 대기
+            Users updatedUser = userRepository.findById(1L);
+            assertThat(updatedUser.getUserAmount()).isEqualTo(110000L);
         }
     }
 
