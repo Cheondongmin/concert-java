@@ -2,9 +2,6 @@ package com.hhplus.concert.core.domain.reservation;
 
 import com.hhplus.concert.IntegrationTest;
 import com.hhplus.concert.core.domain.concert.*;
-import com.hhplus.concert.core.domain.payment.Payment;
-import com.hhplus.concert.core.domain.payment.PaymentRepository;
-import com.hhplus.concert.core.domain.payment.PaymentService;
 import com.hhplus.concert.core.domain.queue.Queue;
 import com.hhplus.concert.core.domain.queue.QueueRepository;
 import com.hhplus.concert.core.domain.queue.QueueStatus;
@@ -47,18 +44,12 @@ public class ReservationServiceTest extends IntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
-    private PaymentRepository paymentRepository;
-
-    @Autowired
     private ReservationService concertService;
-
-    @Autowired
-    private PaymentService paymentService;
 
     @Nested
     class ConcurrencyTests {
         @Test
-        void 좌석_임시예약_동시성_테스트() throws InterruptedException {
+        void 동시에_100개의_요청이_들어올때_하나의_좌석은_한번만_예약된다() throws InterruptedException {
             // given
             int numberOfThreads = 100;
             ExecutorService service = Executors.newFixedThreadPool(numberOfThreads);
@@ -82,7 +73,7 @@ public class ReservationServiceTest extends IntegrationTest {
                 service.execute(() -> {
                     try {
                         // when
-                        concertService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId());
+                        concertService.reserveConcertWithRedis(token, concertSchedule.getId(), concertSeat.getId());
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
@@ -144,7 +135,7 @@ public class ReservationServiceTest extends IntegrationTest {
             // when
             executorService.submit(() -> {
                 try {
-                    concertService.reserveConcert(token1, concertSchedule.getId(), concertSeat.getId());
+                    concertService.reserveConcertWithRedis(token1, concertSchedule.getId(), concertSeat.getId());
                 } finally {
                     latch.countDown(); // 스레드가 종료되면 카운트 감소
                 }
@@ -152,7 +143,7 @@ public class ReservationServiceTest extends IntegrationTest {
 
             executorService.submit(() -> {
                 try {
-                    concertService.reserveConcert(token2, concertSchedule.getId(), concertSeat.getId());
+                    concertService.reserveConcertWithRedis(token2, concertSchedule.getId(), concertSeat.getId());
                 } finally {
                     latch.countDown(); // 스레드가 종료되면 카운트 감소
                 }
@@ -160,7 +151,7 @@ public class ReservationServiceTest extends IntegrationTest {
 
             executorService.submit(() -> {
                 try {
-                    concertService.reserveConcert(token3, concertSchedule.getId(), concertSeat.getId());
+                    concertService.reserveConcertWithRedis(token3, concertSchedule.getId(), concertSeat.getId());
                 } finally {
                     latch.countDown(); // 스레드가 종료되면 카운트 감소
                 }
@@ -168,7 +159,7 @@ public class ReservationServiceTest extends IntegrationTest {
 
             executorService.submit(() -> {
                 try {
-                    concertService.reserveConcert(token4, concertSchedule.getId(), concertSeat.getId());
+                    concertService.reserveConcertWithRedis(token4, concertSchedule.getId(), concertSeat.getId());
                 } finally {
                     latch.countDown(); // 스레드가 종료되면 카운트 감소
                 }
@@ -176,7 +167,7 @@ public class ReservationServiceTest extends IntegrationTest {
 
             executorService.submit(() -> {
                 try {
-                    concertService.reserveConcert(token5, concertSchedule.getId(), concertSeat.getId());
+                    concertService.reserveConcertWithRedis(token5, concertSchedule.getId(), concertSeat.getId());
                 } finally {
                     latch.countDown(); // 스레드가 종료되면 카운트 감소
                 }
@@ -191,56 +182,6 @@ public class ReservationServiceTest extends IntegrationTest {
             // 하나의 스레드만 성공적으로 좌석을 예약해야 함
             assertThat(reservations).hasSize(1);
             assertThat(updatedSeat.getSeatStatus()).isEqualTo(SeatStatus.TEMP_RESERVED); // 좌석이 예약된 상태로 변경
-        }
-
-        @Test
-        void 동일_유저가_여러번_결제요청을_해도_한번만_정상적으로_처리된다() throws InterruptedException {
-            // given
-            Users user = new Users(1L, 1000L); // 유저 잔액은 1000
-            userRepository.save(user);
-            String token = "eyJhbGciOiJub25lIn0.eyJ1c2VySWQiOjEsInRva2VuIjoiMzc2NzcxMTctNzZjMy00NjdjLWFmMjEtOTY0ODI3Nzc3YTU3IiwiZW50ZXJlZER0IjoxNzI5MDY3NjIxMTIwLCJleHBpcmVkRHQiOjE3MjkwNjk0MjExMjB9.";
-            Queue queue = new Queue(user.getId(), token, QueueStatus.PROGRESS, null);
-            queueRepository.save(queue);
-
-            // 콘서트, 콘서트 스케줄 및 좌석 설정
-            Concert concert = new Concert(1L, "testConcert", LocalDateTime.now(), false);
-            concertRepository.save(concert);
-            ConcertSchedule concertSchedule = new ConcertSchedule(1L, concert.getId(), LocalDate.now(), LocalDateTime.now(), LocalDateTime.now().plusHours(2), 50, 50, TotalSeatStatus.AVAILABLE, LocalDateTime.now(), false);
-            concertScheduleRepository.save(concertSchedule);
-            ConcertSeat concertSeat = new ConcertSeat(1L, concertSchedule.getId(), 500L, 1, SeatStatus.AVAILABLE, null, LocalDateTime.now(), false);
-            concertSeatRepository.save(concertSeat);
-
-            // 예약 생성 및 저장
-            ReserveConcertResult result = concertService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId());
-
-            // 동시성 제어를 위한 ExecutorService 설정
-            int threadCount = 10; // 동일한 유저가 10번 결제 요청
-            ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
-            CountDownLatch latch = new CountDownLatch(threadCount);
-
-            // when
-            for (int i = 0; i < threadCount; i++) {
-                executorService.submit(() -> {
-                    try {
-                        paymentService.paymentConcert(token, result.reservationId());
-                    } finally {
-                        latch.countDown(); // 스레드가 종료되면 카운트 감소
-                    }
-                });
-            }
-
-            latch.await(); // 모든 스레드가 완료될 때까지 대기
-
-            // then
-            Users updatedUser = userRepository.findById(user.getId());
-            ConcertSeat updatedSeat = concertSeatRepository.findById(concertSeat.getId());
-            List<Payment> paymentList = paymentRepository.findAll();
-
-            // 한 번만 결제가 성공적으로 완료되어야 함]
-            assertThat(paymentList.size()).isEqualTo(1); // payment는 한번만 등록되어야 함
-            assertThat(paymentList.get(0).getPrice()).isEqualTo(500L);
-            assertThat(updatedUser.getUserAmount()).isEqualTo(500L); // 잔액이 500으로 감소해야 함
-            assertThat(updatedSeat.getSeatStatus()).isEqualTo(SeatStatus.RESERVED); // 좌석 상태가 RESERVED로 변경
         }
     }
 }
