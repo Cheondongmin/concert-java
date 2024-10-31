@@ -73,7 +73,7 @@ public class ReservationServiceTest extends IntegrationTest {
                 service.execute(() -> {
                     try {
                         // when
-                        concertService.reserveConcertWithRedis(token, concertSchedule.getId(), concertSeat.getId());
+                        concertService.reserveConcertWithOptimisticLock(token, concertSchedule.getId(), concertSeat.getId());
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
@@ -135,7 +135,7 @@ public class ReservationServiceTest extends IntegrationTest {
             // when
             executorService.submit(() -> {
                 try {
-                    concertService.reserveConcertWithRedis(token1, concertSchedule.getId(), concertSeat.getId());
+                    concertService.reserveConcert(token1, concertSchedule.getId(), concertSeat.getId());
                 } finally {
                     latch.countDown(); // 스레드가 종료되면 카운트 감소
                 }
@@ -143,7 +143,7 @@ public class ReservationServiceTest extends IntegrationTest {
 
             executorService.submit(() -> {
                 try {
-                    concertService.reserveConcertWithRedis(token2, concertSchedule.getId(), concertSeat.getId());
+                    concertService.reserveConcert(token2, concertSchedule.getId(), concertSeat.getId());
                 } finally {
                     latch.countDown(); // 스레드가 종료되면 카운트 감소
                 }
@@ -151,7 +151,7 @@ public class ReservationServiceTest extends IntegrationTest {
 
             executorService.submit(() -> {
                 try {
-                    concertService.reserveConcertWithRedis(token3, concertSchedule.getId(), concertSeat.getId());
+                    concertService.reserveConcert(token3, concertSchedule.getId(), concertSeat.getId());
                 } finally {
                     latch.countDown(); // 스레드가 종료되면 카운트 감소
                 }
@@ -159,7 +159,7 @@ public class ReservationServiceTest extends IntegrationTest {
 
             executorService.submit(() -> {
                 try {
-                    concertService.reserveConcertWithRedis(token4, concertSchedule.getId(), concertSeat.getId());
+                    concertService.reserveConcert(token4, concertSchedule.getId(), concertSeat.getId());
                 } finally {
                     latch.countDown(); // 스레드가 종료되면 카운트 감소
                 }
@@ -167,7 +167,7 @@ public class ReservationServiceTest extends IntegrationTest {
 
             executorService.submit(() -> {
                 try {
-                    concertService.reserveConcertWithRedis(token5, concertSchedule.getId(), concertSeat.getId());
+                    concertService.reserveConcert(token5, concertSchedule.getId(), concertSeat.getId());
                 } finally {
                     latch.countDown(); // 스레드가 종료되면 카운트 감소
                 }

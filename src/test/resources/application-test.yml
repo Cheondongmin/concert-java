@@ -11,10 +11,6 @@ spring:
     url: jdbc:h2:mem:concert
     username: sa
     password:
-  data:
-    redis:
-      host: localhost
-      port: 6379
 
 server:
   port: 8080
