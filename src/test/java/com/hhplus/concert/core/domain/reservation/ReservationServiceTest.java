@@ -73,7 +73,7 @@ public class ReservationServiceTest extends IntegrationTest {
                 service.execute(() -> {
                     try {
                         // when
-                        concertService.reserveConcertWithOptimisticLock(token, concertSchedule.getId(), concertSeat.getId());
+                        concertService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId());
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
