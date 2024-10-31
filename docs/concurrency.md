@@ -11,7 +11,7 @@ https://frogcodepond.tistory.com/10
 ### 정상 시나리오
 ![동시성제어_정상](https://github.com/user-attachments/assets/0d717b52-642a-4bdd-b9ae-878f93bc6850)
 
-### 동시성 문제 발생 케이스
+### 동시성 문제 발생 케이스
 ![동시성제어_분실갱신](https://github.com/user-attachments/assets/16b53257-1453-4133-bf29-fb8d0501da16)
 
 ### 비스니스 로직 순서
