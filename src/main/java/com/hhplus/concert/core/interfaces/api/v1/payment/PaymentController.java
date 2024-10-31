@@ -25,7 +25,7 @@ public class PaymentController {
             @Schema(description = "대기열 토큰", defaultValue = "Bearer...") @RequestHeader("Authorization") String token,
             @RequestBody PaymentConcertReq req
     ) {
-        PaymentConcertResult paymentConcertResult = paymentService.paymentConcertWithOptimisticLock(token, req.reservationId());
+        PaymentConcertResult paymentConcertResult = paymentService.paymentConcert(token, req.reservationId());
         return CommonRes.success(PaymentConcertRes.of(paymentConcertResult));
     }
 }

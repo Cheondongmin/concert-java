@@ -36,6 +36,9 @@ public class Users {
     @Column(name = "is_delete", nullable = false)
     private Boolean isDelete = false;
 
+    @Version  // 낙관적 락을 위한 버전 필드
+    private int version;
+
     public Users(Long userId, Long userAmount) {
         String randomEmail = generateRandomEmail();
         this.id = userId;

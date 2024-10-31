@@ -1,6 +1,6 @@
-package com.hhplus.concert.core.infrastructure.redis.reservation;
+package com.hhplus.concert.core.infrastructure.redis.user;
 
-import com.hhplus.concert.core.domain.reservation.DistributedLock;
+import com.hhplus.concert.core.domain.user.UserRedisRock;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
-public class ReservationRockUtil implements DistributedLock {
+public class UserRedisRockUtil implements UserRedisRock {
 
     private final RedissonClient redissonClient;
 

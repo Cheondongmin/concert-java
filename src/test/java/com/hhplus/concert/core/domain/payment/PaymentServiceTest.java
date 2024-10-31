@@ -144,7 +144,7 @@ class PaymentServiceTest extends IntegrationTest {
         }
 
         @Test
-        void 동일_유저가_여러번_결제요청을_해도_한번만_정상적으로_처리된다() throws InterruptedException {
+        void 동일_유저가_100번_결제요청을_해도_한번만_정상적으로_처리된다() throws InterruptedException {
             // given
             Users user = new Users(1L, 1000L); // 유저 잔액은 1000
             userRepository.save(user);
@@ -164,7 +164,7 @@ class PaymentServiceTest extends IntegrationTest {
             ReserveConcertResult result = reservationService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId());
 
             // 동시성 제어를 위한 ExecutorService 설정
-            int threadCount = 10; // 동일한 유저가 10번 결제 요청
+            int threadCount = 100; // 동일한 유저가 100번 결제 요청
             ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
             CountDownLatch latch = new CountDownLatch(threadCount);
 

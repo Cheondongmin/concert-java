@@ -1,6 +1,6 @@
-package com.hhplus.concert.core.domain.reservation;
+package com.hhplus.concert.core.domain.payment;
 
-public interface DistributedLock {
+public interface PaymentRedisRock {
     <T> T executeWithLock(String lockKey, long waitTime, long leaseTime, LockTask<T> task);
 
     @FunctionalInterface
