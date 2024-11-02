@@ -9,11 +9,10 @@ import com.hhplus.concert.core.domain.reservation.ReservationRepository;
 import com.hhplus.concert.core.domain.user.UserRepository;
 import com.hhplus.concert.core.domain.user.Users;
 import lombok.RequiredArgsConstructor;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -25,41 +24,51 @@ public class PaymentService {
     private final QueueRepository queueRepository;
     private final ConcertSeatRepository concertSeatRepository;
     private final PaymentHistoryRepository paymentHistoryRepository;
+    private final PlatformTransactionManager transactionManager;
+    private final PaymentRedisRock paymentRedisRock;
 
-    @Transactional
-    public PaymentConcertResult paymentConcert(String token, long reservationId) {
-        long userId = Users.extractUserIdFromJwt(token);
-        Users user = userRepository.findById(userId);
+    public PaymentConcertResult paymentConcertForRedis(String token, long reservationId) {
+        String lockKey = "lock:결제:" + token;
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        return paymentRedisRock.executeWithLock(
+                lockKey,
+                10,
+                15,
+                () -> transactionTemplate.execute(status -> {
+                    try {
+                        long userId = Users.extractUserIdFromJwt(token);
+                        Users user = userRepository.findById(userId);
 
-        Queue queue = queueRepository.findByToken(token);
-        queue.tokenReserveCheck();
+                        Queue queue = queueRepository.findByToken(token);
+                        queue.tokenReserveCheck();
 
-        Reservation reservation = reservationRepository.findById(reservationId);
-        user.checkConcertAmount(reservation.getSeatAmount());
+                        Reservation reservation = reservationRepository.findById(reservationId);
+                        user.checkConcertAmount(reservation.getSeatAmount());
 
-        // 비관적 락을 사용하여 좌석 조회 및 예약 처리
-        ConcertSeat concertSeat = concertSeatRepository.findByIdWithLock(reservation.getSeatId());
-        concertSeat.finishSeatReserve();
-        queue.finishQueue();
+                        // 낙관적 락을 사용하여 좌석 조회 및 예약 처리
+                        ConcertSeat concertSeat = concertSeatRepository.findById(reservation.getSeatId());
+                        concertSeat.finishSeatReserve();
 
-        reservation.finishReserve();
+                        queue.finishQueue();
+                        reservation.finishReserve();
 
-        Payment payment = paymentRepository.findByReservationId(reservation.getId());
-        payment.finishPayment();
+                        Payment payment = paymentRepository.findByReservationId(reservation.getId());
+                        payment.finishPayment();
 
-        PaymentHistory paymentHistory = PaymentHistory.enterPaymentHistory(userId, payment.getPrice(), PaymentType.PAYMENT, payment.getId());
-        paymentHistoryRepository.save(paymentHistory);
+                        PaymentHistory paymentHistory = PaymentHistory.enterPaymentHistory(userId, payment.getPrice(), PaymentType.PAYMENT, payment.getId());
+                        paymentHistoryRepository.save(paymentHistory);
 
-        return new PaymentConcertResult(concertSeat.getAmount(), reservation.getStatus(), queue.getStatus());
+                        return new PaymentConcertResult(concertSeat.getAmount(), reservation.getStatus(), queue.getStatus());
+                    } catch (Exception e) {
+                        status.setRollbackOnly();
+                        throw e;
+                    }
+                })
+        );
     }
 
     @Transactional
-    @Retryable(
-            retryFor = {ObjectOptimisticLockingFailureException.class},
-            maxAttempts = 10,
-            backoff = @Backoff(delay = 200)
-    )
-    public PaymentConcertResult paymentConcertWithOptimisticLock(String token, long reservationId) {
+    public PaymentConcertResult paymentConcert(String token, long reservationId) {
         long userId = Users.extractUserIdFromJwt(token);
         Users user = userRepository.findById(userId);
 

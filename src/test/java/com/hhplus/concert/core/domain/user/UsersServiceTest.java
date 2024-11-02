@@ -29,9 +29,9 @@ class UsersServiceTest extends IntegrationTest {
 
             // when: 1000원, 2000원, 3000원 동시 충전
             CompletableFuture.allOf(
-                    CompletableFuture.runAsync(() -> userService.chargeUserAmountOptimisticLock(TEST_TOKEN, 1000L)),
-                    CompletableFuture.runAsync(() -> userService.chargeUserAmountOptimisticLock(TEST_TOKEN, 2000L)),
-                    CompletableFuture.runAsync(() -> userService.chargeUserAmountOptimisticLock(TEST_TOKEN, 3000L))
+                    CompletableFuture.runAsync(() -> userService.chargeUserAmountRedis(TEST_TOKEN, 1000L)),
+                    CompletableFuture.runAsync(() -> userService.chargeUserAmountRedis(TEST_TOKEN, 2000L)),
+                    CompletableFuture.runAsync(() -> userService.chargeUserAmountRedis(TEST_TOKEN, 3000L))
             ).join();
 
             Thread.sleep(100L);
@@ -42,19 +42,17 @@ class UsersServiceTest extends IntegrationTest {
         }
 
         @Test
-        void 잔액이_1만원인_유저가_100번_동시에_충전요청을_보낸다() throws InterruptedException {
+        void 잔액이_1만원인_유저가_1000원씩_100번_동시에_충전요청을_보낸후_잔액은_1010000원이_된다() throws InterruptedException {
             // given
             Users user = new Users(1L, 10000L);
             userRepository.save(user);
-            int numberOfRequests = 100;
+            int numberOfRequests = 1000;
             Long chargeAmount = 1000L;
 
             // when: 100번의 동시 충전 요청
             CompletableFuture<Void>[] futures = new CompletableFuture[numberOfRequests];
             for(int i = 0; i < numberOfRequests; i++) {
-                futures[i] = CompletableFuture.runAsync(() -> {
-                    userService.chargeUserAmountOptimisticLock(TEST_TOKEN, chargeAmount);
-                });
+                futures[i] = CompletableFuture.runAsync(() -> userService.chargeUserAmount(TEST_TOKEN, chargeAmount));
             }
 
             CompletableFuture.allOf(futures).join();
@@ -62,7 +60,7 @@ class UsersServiceTest extends IntegrationTest {
             // then: 10000 + (1000 * 100) = 110000
             Thread.sleep(100); // 모든 트랜잭션이 완료될 때까지 잠시 대기
             Users updatedUser = userRepository.findById(1L);
-            assertThat(updatedUser.getUserAmount()).isEqualTo(110000L);
+            assertThat(updatedUser.getUserAmount()).isEqualTo(1010000L);
         }
     }
 
