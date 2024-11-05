@@ -14,5 +14,6 @@ public interface QueueRepository {
     int countByStatus(QueueStatus queueStatus);
     List<Queue> findTopNWaiting(int remainingSlots);
     void updateStatusByIds(List<Long> collect, QueueStatus queueStatus);
-    List<Queue> findAllByStatusOrderByIdDesc(QueueStatus queueStatus);
+    void updateQueueToRedis(Queue queue);
+    void clearAll();
 }

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@AllArgsConstructor(access = AccessLevel.PACKAGE)
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Table(name = "QUEUE")
@@ -59,6 +59,14 @@ public class Queue {
         this.expiredDt = expiredDt;
     }
 
+    public Queue(Long userId, String token, QueueStatus status, LocalDateTime enteredDt, LocalDateTime expiredDt) {
+        this.userId = userId;
+        this.token = token;
+        this.status = status;
+        this.enteredDt = enteredDt;
+        this.expiredDt = expiredDt;
+    }
+
     // 토큰 유효성 검증 로직
     public boolean isTokenValid() {
         // 토큰 상태가 WAITING 또는 PROGRESS일 때 유효
@@ -85,7 +93,7 @@ public class Queue {
     }
 
     // JWT 토큰 생성
-    private static String generateJwtToken(Long userId) {
+    public static String generateJwtToken(Long userId) {
         return Jwts.builder()
                 .claim("userId", userId)
                 .claim("token", UUID.randomUUID().toString())
@@ -128,6 +136,10 @@ public class Queue {
         if(!this.expiredDt.isAfter(LocalDateTime.now())) {
             throw new ApiException(ExceptionCode.E403, LogLevel.WARN);
         }
+    }
+
+    public void statusChange(QueueStatus newStatus) {
+        this.status = newStatus;
     }
 }
 

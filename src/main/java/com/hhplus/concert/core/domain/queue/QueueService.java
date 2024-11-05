@@ -19,7 +19,6 @@ public class QueueService {
         // 엔티티 체크 (유효성 검증에서 실패시 새로운 객체(토큰) 반환)
         Queue queue = Queue.enterQueue(existingQueue, userId);
 
-        // 변경되지 않은 엔티티는 업데이트 되지 않음.
         queueRepository.save(queue);
 
         return queue.getToken();
@@ -39,6 +38,8 @@ public class QueueService {
             // 현재 유저의 뒤에 남아있는 대기열 + 1(자기 자신)
             queuePosition = queueRepository.findStatusIsWaitingAndAlreadyEnteredBy(queue.getEnteredDt(), QueueStatus.WAITING) + 1;
         }
+
+        queueRepository.updateQueueToRedis(queue);
 
         return new SelectQueueTokenResult(queuePosition, queue.getStatus());
     }
