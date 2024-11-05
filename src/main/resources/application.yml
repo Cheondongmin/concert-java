@@ -12,6 +12,7 @@ server:
 spring:
   profiles:
     active: test
-user-queue:
-  max-waiting-number: 1000
-  queue-token-expire-time: 10 # minute
+  data:
+    redis:
+      host: localhost
+      port: 6379
