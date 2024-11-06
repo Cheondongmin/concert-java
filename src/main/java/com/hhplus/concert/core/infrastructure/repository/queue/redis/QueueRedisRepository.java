@@ -21,25 +21,45 @@ public class QueueRedisRepository {
     private final ObjectMapper objectMapper;
     private static final String WAITING_QUEUE_KEY = "waiting-queue:";
 
+    /**
+     * Queue를 Redis에 추가
+     * userId를 key로 하는 Sorted Set에 Queue 객체를 저장하며,
+     * score는 현재 시간을 사용하여 시간 순서 보장
+     */
     public void add(Queue queue) {
         String key = generateKey(queue.getUserId());
         long currentTime = System.currentTimeMillis();
         redisTemplate.opsForZSet().add(key, queue, currentTime);
     }
 
+    /**
+     * userId로 대기/진행중인 가장 최근 Queue 조회
+     */
     public Optional<Queue> findByUserIdForWaitingOrProgress(Long userId) {
         return findLatestQueueByKey(generateKey(userId));
     }
 
+    /**
+     * 토큰으로 Queue 조회
+     * JWT 토큰에서 userId를 추출하여 해당 유저의 Queue 조회
+     */
     public Optional<Queue> findByToken(String token) {
         Long userId = Users.extractUserIdFromJwt(token);
         return findLatestQueueByKey(generateKey(userId));
     }
 
+    /**
+     * Redis key 생성
+     * "waiting-queue:{userId}" 형태의 key 생성
+     */
     private String generateKey(Long userId) {
         return WAITING_QUEUE_KEY + userId;
     }
 
+    /**
+     * 특정 key의 Sorted Set에서 가장 최근 Queue 조회
+     * range(-1, -1)로 마지막 요소(가장 최근) 조회
+     */
     private Optional<Queue> findLatestQueueByKey(String key) {
         Set<Object> waitingQueues = redisTemplate.opsForZSet().range(key, -1, -1);
 
@@ -52,6 +72,12 @@ public class QueueRedisRepository {
         return Optional.empty();
     }
 
+    /**
+     * 특정 상태의 모든 Queue를 조회하여 시간 역순으로 정렬
+     * 1. 모든 waiting-queue: 키를 조회
+     * 2. 각 키의 모든 Queue를 가져와서 상태 필터링
+     * 3. enteredDt 기준 역순 정렬
+     */
     public List<Queue> findOrderByDescByStatus(QueueStatus status) {
         List<Queue> filteredQueues = new ArrayList<>();
 
@@ -80,6 +106,9 @@ public class QueueRedisRepository {
         return filteredQueues;
     }
 
+    /**
+     * 특정 시간 이전에 들어온 특정 상태의 Queue 수 조회
+     */
     public long findStatusIsWaitingAndAlreadyEnteredBy(LocalDateTime enteredDt, QueueStatus status) {
         Set<Object> allWaitingQueues = redisTemplate.opsForZSet().rangeByScore(WAITING_QUEUE_KEY, 0, Double.MAX_VALUE);
 
@@ -96,11 +125,18 @@ public class QueueRedisRepository {
         return count;
     }
 
+    /**
+     * Queue 상태 업데이트
+     * 기존 Queue를 새로운 상태로 업데이트하여 Redis에 저장
+     */
     public void updateQueueToRedis(Queue queue) {
         String key = generateKey(queue.getUserId());
         redisTemplate.opsForZSet().add(key, queue, System.currentTimeMillis());
     }
 
+    /**
+     * 모든 Queue 조회
+     */
     public List<Queue> findAll() {
         List<Queue> queueList = new ArrayList<>();
         Set<String> keys = redisTemplate.keys(WAITING_QUEUE_KEY + "*");
@@ -120,6 +156,9 @@ public class QueueRedisRepository {
         return queueList;
     }
 
+    /**
+     * 특정 상태의 Queue 개수 조회
+     */
     public int countByStatus(QueueStatus status) {
         int count = 0;
         Set<String> keys = redisTemplate.keys(WAITING_QUEUE_KEY + "*");
@@ -138,6 +177,12 @@ public class QueueRedisRepository {
         return count;
     }
 
+    /**
+     * 대기 상태의 Queue 중 상위 N개 조회
+     * 1. 모든 waiting-queue: 키를 조회
+     * 2. 대기 상태인 Queue만 필터링
+     * 3. 시간순 정렬 후 반환
+     */
     public List<Queue> findTopNWaiting(int remainingSlots) {
         List<Queue> waitingQueues = new ArrayList<>();
         Set<String> keys = redisTemplate.keys(WAITING_QUEUE_KEY + "*");
@@ -161,6 +206,9 @@ public class QueueRedisRepository {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 특정 ID 목록의 Queue 상태 일괄 업데이트
+     */
     public void updateStatusByIds(List<Long> ids, QueueStatus status) {
         Set<String> keys = redisTemplate.keys(WAITING_QUEUE_KEY + "*");
 
@@ -183,6 +231,9 @@ public class QueueRedisRepository {
         }
     }
 
+    /**
+     * 모든 Redis 데이터 삭제 (테스트용)
+     */
     public void clearAll() {
         Set<String> keys = redisTemplate.keys("*");
         if (keys != null) {
@@ -192,6 +243,10 @@ public class QueueRedisRepository {
         }
     }
 
+    /**
+     * 만료 조건에 해당하는 Queue 상태 업데이트
+     * 특정 상태이면서 특정 시간 이전인 Queue들의 상태를 일괄 업데이트
+     */
     public void updateStatusExpire(QueueStatus updateStatus, QueueStatus conditionStatus, LocalDateTime conditionExpiredAt) {
         Set<String> keys = redisTemplate.keys(WAITING_QUEUE_KEY + "*");
 
