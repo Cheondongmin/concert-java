@@ -1,6 +1,5 @@
 package com.hhplus.concert.core.infrastructure.repository.queue.redis;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hhplus.concert.core.domain.queue.Queue;
 import com.hhplus.concert.core.domain.queue.QueueStatus;
 import com.hhplus.concert.core.domain.user.Users;
@@ -17,8 +16,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class QueueRedisRepository {
 
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final ObjectMapper objectMapper;
+    private final RedisTemplate<String, String> redisTemplate;
     private static final String WAITING_QUEUE_KEY = "waiting-queue:";
 
     // Redis 키 생성
@@ -30,9 +28,30 @@ public class QueueRedisRepository {
     public void add(Queue queue) {
         String key = generateKey(queue.getUserId());
         long score = queue.getEnteredDt().toEpochSecond(ZoneOffset.UTC);
-        redisTemplate.opsForZSet().add(key, queue, score);
-
+        String serializedQueue = serialize(queue);
+        redisTemplate.opsForZSet().add(key, serializedQueue, score);
         redisTemplate.expire(key, 5, TimeUnit.MINUTES);
+    }
+
+    // 수동 직렬화 메서드 (객체 -> 문자열)
+    private String serialize(Queue queue) {
+        return queue.getUserId() + "|" +
+                queue.getToken() + "|" +
+                queue.getEnteredDt().toEpochSecond(ZoneOffset.UTC) + "|" +
+                (queue.getExpiredDt() != null ? queue.getExpiredDt().toEpochSecond(ZoneOffset.UTC) : "") + "|" +
+                queue.getStatus().name();
+    }
+
+    // 수동 역직렬화 메서드 (문자열 -> 객체)
+    private Queue deserialize(String data) {
+        String[] parts = data.split("\\|");
+        Long userId = Long.parseLong(parts[0]);
+        String token = parts[1];
+        LocalDateTime enteredDt = LocalDateTime.ofEpochSecond(Long.parseLong(parts[2]), 0, ZoneOffset.UTC);
+        LocalDateTime expiredDt = parts[3].isEmpty() ? null : LocalDateTime.ofEpochSecond(Long.parseLong(parts[3]), 0, ZoneOffset.UTC);
+        QueueStatus status = QueueStatus.valueOf(parts[4]);
+
+        return new Queue(userId, token, status, enteredDt, expiredDt);
     }
 
     // userId로 최신 Queue 조회
@@ -48,11 +67,10 @@ public class QueueRedisRepository {
 
     // 특정 키의 최신 Queue 조회
     private Optional<Queue> findLatestQueueByKey(String key) {
-        Set<Object> queues = redisTemplate.opsForZSet().range(key, -1, -1);
+        Set<String> queues = redisTemplate.opsForZSet().range(key, -1, -1);
         if (queues != null && !queues.isEmpty()) {
-            Object data = queues.iterator().next();
-            Queue queue = objectMapper.convertValue(data, Queue.class);
-            return Optional.of(queue);
+            String data = queues.iterator().next();
+            return Optional.of(deserialize(data));
         }
         return Optional.empty();
     }
@@ -60,8 +78,7 @@ public class QueueRedisRepository {
     // 상태별 Queue를 시간 역순으로 조회
     public List<Queue> findOrderByDescByStatus(QueueStatus status) {
         List<Queue> orderedQueues = new ArrayList<>();
-        List<Queue> allQueues = findAll();
-        for (Queue queue : allQueues) {
+        for (Queue queue : findAll()) {
             if (queue.getStatus().equals(status)) {
                 orderedQueues.add(queue);
             }
@@ -73,12 +90,12 @@ public class QueueRedisRepository {
     // 특정 시간 이전의 상태별 Queue 수 조회
     public long findStatusIsWaitingAndAlreadyEnteredBy(LocalDateTime enteredDt, QueueStatus status) {
         long scoreThreshold = enteredDt.toEpochSecond(ZoneOffset.UTC);
-        Set<Object> filteredQueues = redisTemplate.opsForZSet().rangeByScore(WAITING_QUEUE_KEY, 0, scoreThreshold);
+        Set<String> filteredQueues = redisTemplate.opsForZSet().rangeByScore(WAITING_QUEUE_KEY, 0, scoreThreshold);
 
         long count = 0;
         if (filteredQueues != null) {
-            for (Object data : filteredQueues) {
-                Queue queue = objectMapper.convertValue(data, Queue.class);
+            for (String data : filteredQueues) {
+                Queue queue = deserialize(data);
                 if (queue.getStatus() == status && queue.getEnteredDt().isBefore(enteredDt)) {
                     count++;
                 }
@@ -91,7 +108,8 @@ public class QueueRedisRepository {
     public void updateQueueToRedis(Queue queue) {
         String key = generateKey(queue.getUserId());
         long score = queue.getEnteredDt().toEpochSecond(ZoneOffset.UTC);
-        redisTemplate.opsForZSet().add(key, queue, score);
+        String serializedQueue = serialize(queue);
+        redisTemplate.opsForZSet().add(key, serializedQueue, score);
     }
 
     // 모든 Queue 조회
@@ -101,11 +119,10 @@ public class QueueRedisRepository {
 
         if (keys != null) {
             for (String key : keys) {
-                Set<Object> queues = redisTemplate.opsForZSet().range(key, 0, -1);
+                Set<String> queues = redisTemplate.opsForZSet().range(key, 0, -1);
                 if (queues != null) {
-                    for (Object obj : queues) {
-                        Queue queue = objectMapper.convertValue(obj, Queue.class);
-                        queueList.add(queue);
+                    for (String data : queues) {
+                        queueList.add(deserialize(data));
                     }
                 }
             }
@@ -116,8 +133,7 @@ public class QueueRedisRepository {
     // 상태별 Queue 개수 조회
     public int countByStatus(QueueStatus status) {
         int count = 0;
-        List<Queue> allQueues = findAll();
-        for (Queue queue : allQueues) {
+        for (Queue queue : findAll()) {
             if (queue.getStatus().equals(status)) {
                 count++;
             }
@@ -128,8 +144,7 @@ public class QueueRedisRepository {
     // 대기 상태의 상위 N개 Queue 조회
     public List<Queue> findTopNWaiting(int remainingSlots) {
         List<Queue> waitingQueues = new ArrayList<>();
-        List<Queue> allQueues = findAll();
-        for (Queue queue : allQueues) {
+        for (Queue queue : findAll()) {
             if (queue.getStatus() == QueueStatus.WAITING) {
                 waitingQueues.add(queue);
             }
@@ -140,9 +155,8 @@ public class QueueRedisRepository {
 
     // 특정 ID 목록의 Queue 상태 일괄 업데이트
     public void updateStatusByIds(List<Long> ids, QueueStatus newStatus) {
-        List<Queue> allQueues = findAll();
-        for (Queue queue : allQueues) {
-            if (ids.contains(queue.getId())) {
+        for (Queue queue : findAll()) {
+            if (ids.contains(queue.getUserId())) {
                 queue.statusChange(newStatus);
                 updateQueueToRedis(queue);
             }

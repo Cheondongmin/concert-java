@@ -61,11 +61,11 @@ public class QueueService {
             List<Queue> waitingUserQueues = queueRepository.findTopNWaiting(remainingSlots);
 
             if (!waitingUserQueues.isEmpty()) {
-                // 상태를 PROGRESS로 업데이트합니다.
-                queueRepository.updateStatusByIds(
-                        waitingUserQueues.stream().map(Queue::getId).collect(Collectors.toList()),
-                        QueueStatus.PROGRESS
-                );
+                // 상태를 PROGRESS로 변경하고 개별적으로 저장합니다.
+                waitingUserQueues.forEach(queue -> {
+                    queue.statusChange(QueueStatus.PROGRESS); // 상태 변경
+                    queueRepository.save(queue); // 개별적으로 저장하여 업데이트 반영
+                });
             }
         }
     }
