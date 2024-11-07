@@ -27,9 +27,11 @@ import java.util.UUID;
 @Component
 public class Users {
 
+    @Transient
     private static Key secretKey;  // JWT 서명 키를 위한 정적 변수
 
     @Value("${jwt.secret-key}")
+    @Transient
     private String secretKeyString;  // JWT 키를 주입받기 위한 필드
 
     @PostConstruct
