@@ -101,7 +101,6 @@ class QueueServiceTest extends IntegrationTest {
         @Test
         void 진행중_인원이_5명_미만이면_대기유저가_PROGRESS_상태가_된다() {
             // given
-            queueRepository.clearAll();  // 데이터 초기화
             LocalDateTime now = LocalDateTime.now();
             List<Queue> queueList = List.of(
                     new Queue(1L, Queue.generateJwtToken(1L), QueueStatus.PROGRESS, now.plusMinutes(10)),

@@ -76,9 +76,4 @@ public class QueueRepositoryImpl implements QueueRepository {
     public void updateQueueToRedis(Queue queue) {
         redisRepository.updateQueueToRedis(queue);
     }
-
-    @Override
-    public void clearAll() {
-        redisRepository.clearAll();
-    }
 }
