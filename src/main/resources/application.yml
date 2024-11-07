@@ -12,6 +12,6 @@ server:
 spring:
   profiles:
     active: test
-user-queue:
-  max-waiting-number: 1000
-  queue-token-expire-time: 10 # minute
+
+jwt:
+  secret-key: "b3f45e8893c24c6b8f7a9f292d7b3a8e9c12d9e8b2e34c6f8f7d9a9b2c3e4f5g"

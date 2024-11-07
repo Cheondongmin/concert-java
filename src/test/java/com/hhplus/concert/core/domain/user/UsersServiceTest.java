@@ -29,9 +29,9 @@ class UsersServiceTest extends IntegrationTest {
 
             // when: 1000원, 2000원, 3000원 동시 충전
             CompletableFuture.allOf(
-                    CompletableFuture.runAsync(() -> userService.chargeUserAmountRedis(TEST_TOKEN, 1000L)),
-                    CompletableFuture.runAsync(() -> userService.chargeUserAmountRedis(TEST_TOKEN, 2000L)),
-                    CompletableFuture.runAsync(() -> userService.chargeUserAmountRedis(TEST_TOKEN, 3000L))
+                    CompletableFuture.runAsync(() -> userService.chargeUserAmount(TEST_TOKEN, 1000L)),
+                    CompletableFuture.runAsync(() -> userService.chargeUserAmount(TEST_TOKEN, 2000L)),
+                    CompletableFuture.runAsync(() -> userService.chargeUserAmount(TEST_TOKEN, 3000L))
             ).join();
 
             Thread.sleep(100L);

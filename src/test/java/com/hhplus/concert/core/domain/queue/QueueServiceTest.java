@@ -62,7 +62,8 @@ class QueueServiceTest extends IntegrationTest {
         void 대기인원이_30명_미만이면_PROGRESS_상태로_변경되고_대기순번_0을_반환한다() {
             // given
             Long userId = 1L;
-            Queue queue = new Queue(userId, "test-token", QueueStatus.WAITING, null);
+            String token = Queue.generateJwtToken(userId);
+            Queue queue = new Queue(userId, token, QueueStatus.WAITING, null);
             queueRepository.save(queue);
 
             List<Queue> waitingQueueList = queueRepository.findOrderByDescByStatus(QueueStatus.WAITING);
@@ -80,12 +81,13 @@ class QueueServiceTest extends IntegrationTest {
             // given
             // 대기열 30명 생성
             for (int i = 1; i <= 30; i++) {
-                Queue otherQueue = new Queue((long) i, "test-token-" + i, QueueStatus.WAITING, null);
+                String token = Queue.generateJwtToken((long) i);
+                Queue otherQueue = new Queue((long) i, token, QueueStatus.WAITING, null);
                 queueRepository.save(otherQueue);
             }
 
             // 31번째 유저 생성
-            Queue queue = new Queue(31L, "test-token-31", QueueStatus.WAITING, null);
+            Queue queue = new Queue(31L, Queue.generateJwtToken(31L), QueueStatus.WAITING, null);
             queueRepository.save(queue);
 
             // when
@@ -100,13 +102,20 @@ class QueueServiceTest extends IntegrationTest {
         void 진행중_인원이_5명_미만이면_대기유저가_PROGRESS_상태가_된다() {
             // given
             LocalDateTime now = LocalDateTime.now();
-            List<Queue> queueList = List.of(new Queue(1L, "token-1", QueueStatus.PROGRESS, now.plusMinutes(10)), new Queue(2L, "token-2", QueueStatus.PROGRESS, now.plusMinutes(9)), new Queue(3L, "token-3", QueueStatus.PROGRESS, now.plusMinutes(8)), new Queue(4L, "token-4", QueueStatus.PROGRESS, now.plusMinutes(7)), new Queue(5L, "token-5", QueueStatus.PROGRESS, now.plusMinutes(6)), new Queue(6L, "token-6", QueueStatus.WAITING, now.plusMinutes(5)), new Queue(7L, "token-7", QueueStatus.WAITING, now.plusMinutes(4)));
+            List<Queue> queueList = List.of(
+                    new Queue(1L, Queue.generateJwtToken(1L), QueueStatus.PROGRESS, now.plusMinutes(10)),
+                    new Queue(2L, Queue.generateJwtToken(2L), QueueStatus.PROGRESS, now.plusMinutes(9)),
+                    new Queue(3L, Queue.generateJwtToken(3L), QueueStatus.PROGRESS, now.plusMinutes(8)),
+                    new Queue(4L, Queue.generateJwtToken(4L), QueueStatus.PROGRESS, now.plusMinutes(7)),
+                    new Queue(5L, Queue.generateJwtToken(5L), QueueStatus.PROGRESS, now.plusMinutes(6)),
+                    new Queue(6L, Queue.generateJwtToken(6L), QueueStatus.WAITING, now.plusMinutes(5)),
+                    new Queue(7L, Queue.generateJwtToken(7L), QueueStatus.WAITING, now.plusMinutes(4)));
 
             for (Queue queue : queueList) {
                 queueRepository.save(queue);
             }
 
-            Queue newQueue = new Queue(8L, "token-8", QueueStatus.WAITING, now.plusMinutes(3));
+            Queue newQueue = new Queue(8L, Queue.generateJwtToken(8L), QueueStatus.WAITING, now.plusMinutes(3));
             queueRepository.save(newQueue);
 
             // when
@@ -121,7 +130,7 @@ class QueueServiceTest extends IntegrationTest {
         @Test
         void EXPIRED_상태의_토큰은_예외가_발생한다() {
             // given
-            Queue expiredQueue = new Queue(1L, "expired-token", QueueStatus.EXPIRED, LocalDateTime.now().minusMinutes(1));
+            Queue expiredQueue = new Queue(1L, Queue.generateJwtToken(1L), QueueStatus.EXPIRED, LocalDateTime.now().minusMinutes(1));
             queueRepository.save(expiredQueue);
 
             // when & then
@@ -134,14 +143,14 @@ class QueueServiceTest extends IntegrationTest {
         @Test
         void 스케줄러는_WAITING_상태의_유저들을_PROGRESS_상태로_변경한다() {
             // given
-            queueRepository.save(new Queue(1L, "test-token1", QueueStatus.WAITING, null));
-            queueRepository.save(new Queue(2L, "test-token2", QueueStatus.WAITING, null));
+            queueRepository.save(new Queue(1L, Queue.generateJwtToken(1L), QueueStatus.WAITING, null));
+            queueRepository.save(new Queue(2L, Queue.generateJwtToken(2L), QueueStatus.WAITING, null));
 
             // when
             queueService.periodicallyEnterUserQueue();
 
             // then
-            List<Queue> progressedQueues = queueRepository.findAllByStatusOrderByIdDesc(QueueStatus.PROGRESS);
+            List<Queue> progressedQueues = queueRepository.findOrderByDescByStatus(QueueStatus.PROGRESS);
             assertEquals(2, progressedQueues.size());
         }
     }
