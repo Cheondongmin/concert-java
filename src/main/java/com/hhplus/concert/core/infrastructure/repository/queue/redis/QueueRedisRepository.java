@@ -152,14 +152,4 @@ public class QueueRedisRepository {
         waitingQueues.sort(Comparator.comparing(Queue::getEnteredDt));
         return waitingQueues.subList(0, Math.min(remainingSlots, waitingQueues.size()));
     }
-
-    // 특정 ID 목록의 Queue 상태 일괄 업데이트
-    public void updateStatusByIds(List<Long> ids, QueueStatus newStatus) {
-        for (Queue queue : findAll()) {
-            if (ids.contains(queue.getUserId())) {
-                queue.statusChange(newStatus);
-                updateQueueToRedis(queue);
-            }
-        }
-    }
 }

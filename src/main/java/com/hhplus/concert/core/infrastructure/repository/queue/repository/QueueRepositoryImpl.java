@@ -59,11 +59,6 @@ public class QueueRepositoryImpl implements QueueRepository {
     }
 
     @Override
-    public void updateStatusByIds(List<Long> collect, QueueStatus queueStatus) {
-        redisRepository.updateStatusByIds(collect, queueStatus);
-    }
-
-    @Override
     public void updateQueueToRedis(Queue queue) {
         redisRepository.updateQueueToRedis(queue);
     }

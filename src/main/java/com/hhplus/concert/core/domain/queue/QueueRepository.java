@@ -12,6 +12,5 @@ public interface QueueRepository {
     Long findStatusIsWaitingAndAlreadyEnteredBy(LocalDateTime enteredDt, QueueStatus queueStatus);
     int countByStatus(QueueStatus queueStatus);
     List<Queue> findTopNWaiting(int remainingSlots);
-    void updateStatusByIds(List<Long> collect, QueueStatus queueStatus);
     void updateQueueToRedis(Queue queue);
 }
