@@ -30,9 +30,11 @@ import java.util.UUID;
 @Component
 public class Queue {
 
+    @Transient
     private static Key key;  // JWT 서명 키를 위한 정적 변수
 
     @Value("${jwt.secret-key}")
+    @Transient
     private String secretKeyString;  // JWT 키를 가져오는 필드
 
     @PostConstruct
