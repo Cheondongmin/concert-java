@@ -49,15 +49,6 @@ public class QueueRepositoryImpl implements QueueRepository {
     }
 
     @Override
-    public void updateExpireConditionToken() {
-            redisRepository.updateStatusExpire(
-                QueueStatus.EXPIRED,
-                QueueStatus.PROGRESS,
-                LocalDateTime.now()
-        );
-    }
-
-    @Override
     public int countByStatus(QueueStatus queueStatus) {
         return redisRepository.countByStatus(queueStatus);
     }

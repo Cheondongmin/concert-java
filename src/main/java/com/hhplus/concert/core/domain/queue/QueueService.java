@@ -45,14 +45,6 @@ public class QueueService {
     }
 
     /**
-     * 토큰 만료 여부 조건일 경우 토큰 상태값을 업데이트 한다.
-     */
-    @Transactional
-    public void updateExpireConditionToken() {
-        queueRepository.updateExpireConditionToken();
-    }
-
-    /**
      * 대기열에서 제한 인원에 허용하는 만큼 유저를 진입시킨다
      */
     @Transactional

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Repository
 @RequiredArgsConstructor
@@ -30,6 +31,8 @@ public class QueueRedisRepository {
         String key = generateKey(queue.getUserId());
         long score = queue.getEnteredDt().toEpochSecond(ZoneOffset.UTC);
         redisTemplate.opsForZSet().add(key, queue, score);
+
+        redisTemplate.expire(key, 5, TimeUnit.MINUTES);
     }
 
     // userId로 최신 Queue 조회
@@ -140,17 +143,6 @@ public class QueueRedisRepository {
         List<Queue> allQueues = findAll();
         for (Queue queue : allQueues) {
             if (ids.contains(queue.getId())) {
-                queue.statusChange(newStatus);
-                updateQueueToRedis(queue);
-            }
-        }
-    }
-
-    // 만료 조건에 따라 Queue 상태 업데이트
-    public void updateStatusExpire(QueueStatus newStatus, QueueStatus conditionStatus, LocalDateTime conditionExpiredAt) {
-        List<Queue> allQueues = findAll();
-        for (Queue queue : allQueues) {
-            if (queue.getStatus().equals(conditionStatus) && queue.getEnteredDt().isBefore(conditionExpiredAt)) {
                 queue.statusChange(newStatus);
                 updateQueueToRedis(queue);
             }
