@@ -74,13 +74,14 @@ public class ReservationService {
         );
         paymentRepository.save(payment);
 
-        // 5. 이벤트 발행
+        // 5. 예약완료 이벤트 발행
         eventPublisher.publishEvent(new ReservationCreatedEvent(
                 validationResult.userId(),
                 reservation.getId(),
                 seatId,
                 scheduleId,
-                concertSeat.getAmount()
+                concertSeat.getAmount(),
+                reservation.getConcertStartDt()
         ));
 
         return new ReserveConcertResult(reservation.getId(),

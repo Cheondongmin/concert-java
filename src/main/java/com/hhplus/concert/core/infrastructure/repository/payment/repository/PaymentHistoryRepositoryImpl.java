@@ -15,4 +15,9 @@ public class PaymentHistoryRepositoryImpl implements PaymentHistoryRepository {
     public void save(PaymentHistory paymentHistory) {
         jpaRepository.save(paymentHistory);
     }
+
+    @Override
+    public PaymentHistory findByPaymentId(long paymentId) {
+        return jpaRepository.findByPaymentId(paymentId);
+    }
 }

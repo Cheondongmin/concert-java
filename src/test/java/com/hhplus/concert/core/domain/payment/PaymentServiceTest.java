@@ -59,7 +59,7 @@ class PaymentServiceTest extends IntegrationTest {
             // given
             Users user = new Users(1L, 1000L); // 유저 잔액은 1000원
             userRepository.save(user);
-            String token = "eyJhbGciOiJub25lIn0.eyJ1c2VySWQiOjEsInRva2VuIjoiMzc2NzcxMTctNzZjMy00NjdjLWFmMjEtOTY0ODI3Nzc3YTU3IiwiZW50ZXJlZER0IjoxNzI5MDY3NjIxMTIwLCJleHBpcmVkRHQiOjE3MjkwNjk0MjExMjB9.";
+            String token = Queue.generateJwtToken(1L);
             Queue queue = new Queue(user.getId(), token, QueueStatus.PROGRESS, null);
             queueRepository.save(queue);
 
@@ -101,7 +101,7 @@ class PaymentServiceTest extends IntegrationTest {
             // given
             Users user = new Users(1L, 1000L); // 유저 잔액은 1000원
             userRepository.save(user);
-            String token = "eyJhbGciOiJub25lIn0.eyJ1c2VySWQiOjEsInRva2VuIjoiMzc2NzcxMTctNzZjMy00NjdjLWFmMjEtOTY0ODI3Nzc3YTU3IiwiZW50ZXJlZER0IjoxNzI5MDY3NjIxMTIwLCJleHBpcmVkRHQiOjE3MjkwNjk0MjExMjB9.";
+            String token = Queue.generateJwtToken(1L);
             Queue queue = new Queue(user.getId(), token, QueueStatus.PROGRESS, null);
             queueRepository.save(queue);
 
@@ -148,7 +148,7 @@ class PaymentServiceTest extends IntegrationTest {
             // given
             Users user = new Users(1L, 1000L); // 유저 잔액은 1000
             userRepository.save(user);
-            String token = "eyJhbGciOiJub25lIn0.eyJ1c2VySWQiOjEsInRva2VuIjoiMzc2NzcxMTctNzZjMy00NjdjLWFmMjEtOTY0ODI3Nzc3YTU3IiwiZW50ZXJlZER0IjoxNzI5MDY3NjIxMTIwLCJleHBpcmVkRHQiOjE3MjkwNjk0MjExMjB9.";
+            String token = Queue.generateJwtToken(1L);
             Queue queue = new Queue(user.getId(), token, QueueStatus.PROGRESS, null);
             queueRepository.save(queue);
 

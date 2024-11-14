@@ -91,6 +91,8 @@ public class Reservation {
     public void finishReserve() {
         if(this.status == ReservationStatus.TEMP_RESERVED) {
             this.status = ReservationStatus.RESERVED;
+        } else {
+            throw new IllegalArgumentException("잘못 된 상태입니다.");
         }
     }
 }
