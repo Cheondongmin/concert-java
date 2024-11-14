@@ -18,6 +18,7 @@ class ReservationUnitTest {
             // given
             Long userId = 1L;
             Long seatId = 1L;
+            Long concertScheduleId = 1L;
             String concertTitle = "테스트 콘서트";
             LocalDate openDt = LocalDate.now();
             LocalDateTime startDt = LocalDateTime.now().plusHours(1);
@@ -27,7 +28,7 @@ class ReservationUnitTest {
 
             // when
             Reservation reservation = new Reservation(
-                    userId, seatId, concertTitle, openDt, startDt, endDt,
+                    userId, seatId, concertScheduleId, concertTitle, openDt, startDt, endDt,
                     seatAmount, seatPosition
             );
 
@@ -56,7 +57,7 @@ class ReservationUnitTest {
         void TEMP_RESERVED_상태에서_RESERVED_상태로_변경된다() {
             // given
             Reservation reservation = new Reservation(
-                    1L, 1L, "테스트 콘서트",
+                    1L, 1L, 1L, "테스트 콘서트",
                     LocalDate.now(), LocalDateTime.now(), LocalDateTime.now().plusHours(2),
                     50000L, 1
             );
@@ -73,7 +74,7 @@ class ReservationUnitTest {
         void 이미_RESERVED_상태면_상태가_변경되지_않는다() {
             // given
             Reservation reservation = new Reservation(
-                    1L, 1L, "테스트 콘서트",
+                    1L, 1L, 1L, "테스트 콘서트",
                     LocalDate.now(), LocalDateTime.now(), LocalDateTime.now().plusHours(2),
                     50000L, 1
             );
