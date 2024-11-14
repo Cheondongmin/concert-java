@@ -31,3 +31,8 @@ springdoc:
     path: /swagger-ui.html  # Swagger UI 경로
     display-request-duration: true
     operationsSorter: method
+
+message:
+  bot-token: "7571399816:AAHID_WyHT3TvUqh6F8nA8xQxXhyehnP8gw"
+  chat-id: "5429089763"
+  env: "[TEST]"
