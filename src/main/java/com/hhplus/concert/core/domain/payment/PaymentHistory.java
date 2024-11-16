@@ -63,4 +63,8 @@ public class PaymentHistory {
     public static PaymentHistory enterPaymentHistory(Long userId, Long amount, PaymentType paymentType, Long paymentId) {
         return new PaymentHistory(userId, amount, paymentType, paymentId);
     }
+
+    public void isDelete(Boolean isDelete) {
+        this.isDelete = isDelete;
+    }
 }

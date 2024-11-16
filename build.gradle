@@ -63,6 +63,9 @@ dependencies {
 	// redis
 	implementation 'org.redisson:redisson-spring-boot-starter:3.24.3'
 	implementation 'io.lettuce:lettuce-core'
+
+	// https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
+	implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 }
 
 tasks.named('test') {

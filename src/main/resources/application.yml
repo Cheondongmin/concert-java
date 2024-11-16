@@ -19,3 +19,8 @@ spring:
 
 jwt:
   secret-key: "b3f45e8893c24c6b8f7a9f292d7b3a8e9c12d9e8b2e34c6f8f7d9a9b2c3e4f5g"
+
+message:
+  bot-token: "7571399816:AAHID_WyHT3TvUqh6F8nA8xQxXhyehnP8gw"
+  chat-id: "5429089763"
+  env: "[DEFAULT]"

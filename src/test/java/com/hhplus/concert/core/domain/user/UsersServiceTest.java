@@ -1,6 +1,7 @@
 package com.hhplus.concert.core.domain.user;
 
 import com.hhplus.concert.IntegrationTest;
+import com.hhplus.concert.core.domain.queue.Queue;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,6 @@ class UsersServiceTest extends IntegrationTest {
     @Autowired
     private UserService userService;
 
-    private final String TEST_TOKEN = "eyJhbGciOiJub25lIn0.eyJ1c2VySWQiOjEsInRva2VuIjoiMzc2NzcxMTctNzZjMy00NjdjLWFmMjEtOTY0ODI3Nzc3YTU3IiwiZW50ZXJlZER0IjoxNzI5MDY3NjIxMTIwLCJleHBpcmVkRHQiOjE3MjkwNjk0MjExMjB9.";
-
     @Nested
     class ConcurrencyTests {
         @Test
@@ -26,18 +25,19 @@ class UsersServiceTest extends IntegrationTest {
             // given
             Users user = new Users(1L, 10000L);
             userRepository.save(user);
+            String token = Queue.generateJwtToken(user.getId());
 
             // when: 1000원, 2000원, 3000원 동시 충전
             CompletableFuture.allOf(
-                    CompletableFuture.runAsync(() -> userService.chargeUserAmount(TEST_TOKEN, 1000L)),
-                    CompletableFuture.runAsync(() -> userService.chargeUserAmount(TEST_TOKEN, 2000L)),
-                    CompletableFuture.runAsync(() -> userService.chargeUserAmount(TEST_TOKEN, 3000L))
+                    CompletableFuture.runAsync(() -> userService.chargeUserAmount(token, 1000L)),
+                    CompletableFuture.runAsync(() -> userService.chargeUserAmount(token, 2000L)),
+                    CompletableFuture.runAsync(() -> userService.chargeUserAmount(token, 3000L))
             ).join();
 
             Thread.sleep(100L);
 
             // then: 10000 + 1000 + 2000 + 3000 = 16000
-            long amount = userService.selectUserAmount(TEST_TOKEN);
+            long amount = userService.selectUserAmount(token);
             assertThat(amount).isEqualTo(16000L);
         }
 
@@ -48,11 +48,12 @@ class UsersServiceTest extends IntegrationTest {
             userRepository.save(user);
             int numberOfRequests = 1000;
             Long chargeAmount = 1000L;
+            String token = Queue.generateJwtToken(user.getId());
 
             // when: 100번의 동시 충전 요청
             CompletableFuture<Void>[] futures = new CompletableFuture[numberOfRequests];
             for(int i = 0; i < numberOfRequests; i++) {
-                futures[i] = CompletableFuture.runAsync(() -> userService.chargeUserAmount(TEST_TOKEN, chargeAmount));
+                futures[i] = CompletableFuture.runAsync(() -> userService.chargeUserAmount(token, chargeAmount));
             }
 
             CompletableFuture.allOf(futures).join();
@@ -70,11 +71,12 @@ class UsersServiceTest extends IntegrationTest {
         void 잔액이_1000원인_유저가_1000원과_2000원을_충전하면_4000원이_된다() {
             // given: 초기 잔액 1000원
             userRepository.save(new Users(1L, 1000L));
+            String token = Queue.generateJwtToken(1L);
 
             // when: 1000원, 2000원 순차 충전
-            userService.chargeUserAmount(TEST_TOKEN, 1000L);
-            userService.chargeUserAmount(TEST_TOKEN, 2000L);
-            long userAmount = userService.selectUserAmount(TEST_TOKEN);
+            userService.chargeUserAmount(token, 1000L);
+            userService.chargeUserAmount(token, 2000L);
+            long userAmount = userService.selectUserAmount(token);
 
             // then: 1000 + 1000 + 2000 = 4000
             assertThat(userAmount).isEqualTo(4000L);
