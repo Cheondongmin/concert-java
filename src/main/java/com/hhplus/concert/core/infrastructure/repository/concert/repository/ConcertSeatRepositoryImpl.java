@@ -36,4 +36,10 @@ public class ConcertSeatRepositoryImpl implements ConcertSeatRepository {
     public void save(ConcertSeat concertSeat) {
         jpaRepository.save(concertSeat);
     }
+
+    @Override
+    public ConcertSeat findAvailableSeatWithLock(long seatId) {
+        return (ConcertSeat) jpaRepository.findAvailableSeatWithLock(seatId).orElseThrow(
+                () -> new RuntimeException("해당 정보를 가진 좌석을 조회할 수 없습니다."));
+    }
 }

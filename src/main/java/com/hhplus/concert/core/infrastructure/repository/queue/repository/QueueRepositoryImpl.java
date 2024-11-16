@@ -1,9 +1,9 @@
 package com.hhplus.concert.core.infrastructure.repository.queue.repository;
 
 import com.hhplus.concert.core.domain.queue.Queue;
-import com.hhplus.concert.core.domain.queue.QueueStatus;
 import com.hhplus.concert.core.domain.queue.QueueRepository;
-import com.hhplus.concert.core.infrastructure.repository.queue.persistence.QueueJpaRepository;
+import com.hhplus.concert.core.domain.queue.QueueStatus;
+import com.hhplus.concert.core.infrastructure.repository.queue.redis.QueueRedisRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -14,66 +14,52 @@ import java.util.List;
 @RequiredArgsConstructor
 public class QueueRepositoryImpl implements QueueRepository {
 
-    private final QueueJpaRepository jpaRepository;
+    private final QueueRedisRepository redisRepository;
 
     @Override
     public Queue findByUserIdForWaitingOrProgress(Long userId) {
-        return jpaRepository.findByUserIdForWaitingOrProgress(userId)
+        return redisRepository.findByUserIdForWaitingOrProgress(userId)
                 .orElse(null);
     }
 
     @Override
     public void save(Queue queue) {
-        jpaRepository.save(queue);
+        redisRepository.add(queue);
     }
 
     @Override
     public List<Queue> findAll() {
-        return jpaRepository.findAll();
+        return redisRepository.findAll();
     }
 
     @Override
     public List<Queue> findOrderByDescByStatus(QueueStatus queueStatus) {
-        return jpaRepository.findAllByStatusOrderByIdDesc(queueStatus);
+        return redisRepository.findOrderByDescByStatus(queueStatus);
     }
 
     @Override
     public Queue findByToken(String token) {
-        return jpaRepository.findByToken(token)
+        return redisRepository.findByToken(token)
                 .orElseThrow(() -> new NullPointerException("해당 토큰의 큐가 존재하지 않습니다."));
     }
 
     @Override
     public Long findStatusIsWaitingAndAlreadyEnteredBy(LocalDateTime enteredDt, QueueStatus queueStatus) {
-        return jpaRepository.findStatusIsWaitingAndAlreadyEnteredBy(enteredDt, queueStatus);
-    }
-
-    @Override
-    public void updateExpireConditionToken() {
-        jpaRepository.updateStatusExpire(
-                QueueStatus.EXPIRED,
-                QueueStatus.PROGRESS,
-                LocalDateTime.now()
-        );
+        return redisRepository.findStatusIsWaitingAndAlreadyEnteredBy(enteredDt, queueStatus);
     }
 
     @Override
     public int countByStatus(QueueStatus queueStatus) {
-        return jpaRepository.countByStatus(queueStatus);
+        return redisRepository.countByStatus(queueStatus);
     }
 
     @Override
     public List<Queue> findTopNWaiting(int remainingSlots) {
-        return jpaRepository.findTopNWaiting(QueueStatus.WAITING, remainingSlots);
+        return redisRepository.findTopNWaiting(remainingSlots);
     }
 
     @Override
-    public void updateStatusByIds(List<Long> collect, QueueStatus queueStatus) {
-        jpaRepository.updateStatusByIds(collect, queueStatus);
-    }
-
-    @Override
-    public List<Queue> findAllByStatusOrderByIdDesc(QueueStatus queueStatus) {
-        return jpaRepository.findAllByStatusOrderByIdDesc(queueStatus);
+    public void updateQueueToRedis(Queue queue) {
+        redisRepository.updateQueueToRedis(queue);
     }
 }

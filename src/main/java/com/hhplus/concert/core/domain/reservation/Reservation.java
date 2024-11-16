@@ -27,6 +27,9 @@ public class Reservation {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Column(name = "concert_schedule_id", nullable = false)
+    private Long concertScheduleId;
+
     @Column(name = "seat_id", nullable = false)
     private Long seatId;
 
@@ -64,8 +67,9 @@ public class Reservation {
     @Column(name = "is_delete", nullable = false)
     private Boolean isDelete = false;
 
-    public Reservation(Long userId, Long seatId, String concertTitle, LocalDate concertOpenDt, LocalDateTime concertStartDt, LocalDateTime concertEndDt, Long seatAmount, Integer seatPosition) {
+    public Reservation(Long userId, Long concertScheduleId, Long seatId, String concertTitle, LocalDate concertOpenDt, LocalDateTime concertStartDt, LocalDateTime concertEndDt, Long seatAmount, Integer seatPosition) {
         this.userId = userId;
+        this.concertScheduleId = concertScheduleId;
         this.seatId = seatId;
         this.concertTitle = concertTitle;
         this.concertOpenDt = concertOpenDt;
@@ -81,7 +85,7 @@ public class Reservation {
     }
 
     public static Reservation enterReservation(Users user, Concert concert, ConcertSeat concertSeat, ConcertSchedule concertSchedule) {
-        return new Reservation(user.getId(), concertSeat.getId(), concert.getTitle(), concertSchedule.getOpenDt(), concertSchedule.getStartDt(), concertSchedule.getEndDt(), concertSeat.getAmount(), concertSeat.getPosition());
+        return new Reservation(user.getId(), concertSchedule.getId(), concertSeat.getId(), concert.getTitle(), concertSchedule.getOpenDt(), concertSchedule.getStartDt(), concertSchedule.getEndDt(), concertSeat.getAmount(), concertSeat.getPosition());
     }
 
     public void finishReserve() {

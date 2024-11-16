@@ -12,6 +12,10 @@ server:
 spring:
   profiles:
     active: test
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 jwt:
   secret-key: "b3f45e8893c24c6b8f7a9f292d7b3a8e9c12d9e8b2e34c6f8f7d9a9b2c3e4f5g"

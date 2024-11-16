@@ -7,4 +7,5 @@ public interface ConcertSeatRepository {
     ConcertSeat findByIdWithLock(long seatId);
     ConcertSeat findById(long seatId);
     void save(ConcertSeat concertSeat);
+    ConcertSeat findAvailableSeatWithLock(long seatId);
 }

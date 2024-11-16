@@ -57,7 +57,7 @@ public class ReservationServiceTest extends IntegrationTest {
 
             Users user = new Users(1L, 1000L); // 유저 잔액은 1000
             userRepository.save(user);
-            String token = "eyJhbGciOiJub25lIn0.eyJ1c2VySWQiOjEsInRva2VuIjoiMzc2NzcxMTctNzZjMy00NjdjLWFmMjEtOTY0ODI3Nzc3YTU3IiwiZW50ZXJlZER0IjoxNzI5MDY3NjIxMTIwLCJleHBpcmVkRHQiOjE3MjkwNjk0MjExMjB9.";
+            String token = Queue.generateJwtToken(1L);
             Queue queue = new Queue(user.getId(), token, QueueStatus.PROGRESS, null);
             queueRepository.save(queue);
 
@@ -102,11 +102,11 @@ public class ReservationServiceTest extends IntegrationTest {
                 userRepository.save(user);
             }
 
-            String token1 = "eyJhbGciOiJub25lIn0.eyJ1c2VySWQiOjEsInRva2VuIjoiMzc2NzcxMTctNzZjMy00NjdjLWFmMjEtOTY0ODI3Nzc3YTU3IiwiZW50ZXJlZER0IjoxNzI5MDY3NjIxMTIwLCJleHBpcmVkRHQiOjE3MjkwNjk0MjExMjB9.";
-            String token2 = "eyJhbGciOiJub25lIn0.eyJ1c2VySWQiOjIsInRva2VuIjoiNTQ0ODAyMjUtZmI4Mi00OTRlLThkZDQtOGE1NTYzYjBlN2EwIiwiZW50ZXJlZER0IjoxNzI5MTg3NzE4NzIyLCJleHBpcmVkRHQiOjE3MjkxODgwMTg3MjJ9.";
-            String token3 = "eyJhbGciOiJub25lIn0.eyJ1c2VySWQiOjMsInRva2VuIjoiOWUyMTk1NWMtMjY5YS00ZDllLWFmYzYtOTljOTE1NTg4NTFiIiwiZW50ZXJlZER0IjoxNzI5MTg3ODM1MzgzLCJleHBpcmVkRHQiOjE3MjkxODgxMzUzODN9.";
-            String token4 = "eyJhbGciOiJub25lIn0.eyJ1c2VySWQiOjQsInRva2VuIjoiNTRiOTdiNmEtNjJjMS00NDg0LTg4NjgtNzc5OTUxYTA4YTBjIiwiZW50ZXJlZER0IjoxNzI5MTg3ODQ5MzMwLCJleHBpcmVkRHQiOjE3MjkxODgxNDkzMzB9.";
-            String token5 = "eyJhbGciOiJub25lIn0.eyJ1c2VySWQiOjUsInRva2VuIjoiODg5ZGI4OGQtNzVlZS00MTFlLWI3MzAtOTg3NmIyYTk0MWFhIiwiZW50ZXJlZER0IjoxNzI5MTg3ODY3OTExLCJleHBpcmVkRHQiOjE3MjkxODgxNjc5MTF9.";
+            String token1 = Queue.generateJwtToken(1L);;
+            String token2 = Queue.generateJwtToken(2L);;
+            String token3 = Queue.generateJwtToken(3L);;
+            String token4 = Queue.generateJwtToken(4L);;
+            String token5 = Queue.generateJwtToken(5L);;
 
             // 큐 생성 및 저장
             Queue queue1 = new Queue(user1.getId(), token1, QueueStatus.PROGRESS, LocalDateTime.now().plusMinutes(10));

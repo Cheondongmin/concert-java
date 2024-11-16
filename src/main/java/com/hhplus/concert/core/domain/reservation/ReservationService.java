@@ -10,6 +10,9 @@ import com.hhplus.concert.core.domain.user.UserRepository;
 import com.hhplus.concert.core.domain.user.Users;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,6 +28,11 @@ public class ReservationService {
     private final PaymentRepository paymentRepository;
 
     @Transactional
+    @Retryable(
+            value = PessimisticLockingFailureException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 200)
+    )
     public ReserveConcertResult reserveConcert(String token, long scheduleId, long seatId) {
         long userId = Users.extractUserIdFromJwt(token);
         Users user = userRepository.findById(userId);
@@ -36,7 +44,7 @@ public class ReservationService {
         concertSchedule.isSoldOutCheck();
 
         // 낙관적 락을 사용하여 좌석 조회 및 예약 처리
-        ConcertSeat concertSeat = concertSeatRepository.findById(seatId);
+        ConcertSeat concertSeat = concertSeatRepository.findAvailableSeatWithLock(seatId);
         concertSeat.isReserveCheck();
 
         Concert concert = concertRepository.findById(concertSchedule.getConcertId());

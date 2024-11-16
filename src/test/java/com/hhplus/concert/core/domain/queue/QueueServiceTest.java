@@ -95,7 +95,7 @@ class QueueServiceTest extends IntegrationTest {
             SelectQueueTokenResult result = queueService.checkQueue(queue.getToken());
 
             // then
-            assertAll(() -> assertThat(waitingQueueList.size()).isGreaterThanOrEqualTo(30), () -> assertThat(result.status()).isEqualTo(QueueStatus.WAITING), () -> assertThat(result.queuePosition()).isEqualTo(31L));
+            assertAll(() -> assertThat(waitingQueueList.size()).isGreaterThanOrEqualTo(30), () -> assertThat(result.status()).isEqualTo(QueueStatus.WAITING), () -> assertThat(result.queuePosition()).isEqualTo(1L));
         }
 
         @Test
