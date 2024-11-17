@@ -1,9 +1,9 @@
 package com.hhplus.concert.core.domain.user;
 
-import com.hhplus.concert.core.domain.event.user.UserChargeHistoryInsertEvent;
+import com.hhplus.concert.core.domain.payment.PaymentHistory;
+import com.hhplus.concert.core.domain.payment.PaymentHistoryRepository;
 import com.hhplus.concert.core.domain.payment.PaymentType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final PaymentHistoryRepository paymentHistoryRepository;
 
     @Transactional(readOnly = true)
     public long selectUserAmount(String token) {
@@ -34,16 +34,8 @@ public class UserService {
         long userId = Users.extractUserIdFromJwt(token);
         Users user = userRepository.findById(userId);
         user.addAmount(amount);
-
-        // 히스토리 이벤트 생성 (아직 발행하지 않음)
-        UserChargeHistoryInsertEvent historyEvent = new UserChargeHistoryInsertEvent(
-                user.getId(),
-                amount,
-                PaymentType.REFUND
-        );
-
-        eventPublisher.publishEvent(historyEvent);
-
+        PaymentHistory paymentHistory = PaymentHistory.enterPaymentHistory(user.getId(), amount, PaymentType.REFUND);
+        paymentHistoryRepository.save(paymentHistory);
         return user.getUserAmount();
     }
 }
