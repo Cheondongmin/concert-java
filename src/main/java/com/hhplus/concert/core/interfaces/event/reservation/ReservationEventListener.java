@@ -1,7 +1,7 @@
 package com.hhplus.concert.core.interfaces.event.reservation;
 
 import com.hhplus.concert.core.domain.reservation.ReservationMessageSendEvent;
-import com.hhplus.concert.core.domain.telegram.MessageSender;
+import com.hhplus.concert.core.domain.message.MessageSender;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;

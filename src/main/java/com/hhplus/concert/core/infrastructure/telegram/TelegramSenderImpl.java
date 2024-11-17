@@ -1,7 +1,7 @@
 package com.hhplus.concert.core.infrastructure.telegram;
 
 import com.google.gson.JsonObject;
-import com.hhplus.concert.core.domain.telegram.MessageSender;
+import com.hhplus.concert.core.domain.message.MessageSender;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Value;

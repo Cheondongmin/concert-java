@@ -1,4 +1,4 @@
-package com.hhplus.concert.core.domain.telegram;
+package com.hhplus.concert.core.domain.message;
 
 public interface MessageSender {
     void sendMessage(String message);

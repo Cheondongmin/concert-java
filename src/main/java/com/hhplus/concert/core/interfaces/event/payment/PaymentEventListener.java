@@ -1,7 +1,7 @@
 package com.hhplus.concert.core.interfaces.event.payment;
 
 import com.hhplus.concert.core.domain.payment.PaymentMessageSendEvent;
-import com.hhplus.concert.core.domain.telegram.MessageSender;
+import com.hhplus.concert.core.domain.message.MessageSender;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
