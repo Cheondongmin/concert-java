@@ -25,7 +25,6 @@ public class SeatAssignReleaseChecker {
         concertRepository.deleteSeats(getSeatIds(reservations));
     }
 
-
     private List<Long> getReservationIds(List<Reservation> reservations) {
         return reservations.stream().map(Reservation::getId).toList();
     }

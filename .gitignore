@@ -234,3 +234,4 @@ gradle-app.setting
 /data/
 /.settings/org.eclipse.buildship.core.prefs
 *.exe
+/kafka/
