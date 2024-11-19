@@ -253,6 +253,8 @@ class KafkaConnectionTest {
    }
 }
 ```
+![img_1.png](img_1.png)
+(테스트 성공 확인)
 
 ## 7. 문제 해결 가이드
 
