@@ -16,7 +16,20 @@ spring:
     redis:
       host: localhost
       port: 6379
-
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: PAYMENT-CONSUMER-GROUP
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    producer:
+      topic:
+        payment-success: PAYMENT-SUCCESS
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 jwt:
   secret-key: "b3f45e8893c24c6b8f7a9f292d7b3a8e9c12d9e8b2e34c6f8f7d9a9b2c3e4f5g"
 
