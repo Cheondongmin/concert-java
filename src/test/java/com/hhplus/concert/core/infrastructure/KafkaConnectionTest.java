@@ -1,4 +1,4 @@
-package com.hhplus.concert.core.integration;
+package com.hhplus.concert.core.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -38,10 +38,7 @@ class KafkaConnectionTest {
     }
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
-//    private KafkaTemplate<String, ConcertPayment> kafkaTemplate;
-
     private String receivedMessage;
-//    private ConcertPayment receivedMessage;
 
 
     @Test
