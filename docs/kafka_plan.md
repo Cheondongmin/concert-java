@@ -42,14 +42,8 @@ public PaymentConcertResult paymentConcert(String token, long reservationId) {
 ## 2. Kafka 기반 알림 시스템 설계
 
 ### 2.1 시스템 구조
-```mermaid
-graph LR
-    P[Payment Service] -->|1. 결제완료 이벤트| K[Kafka Broker]
-    K -->|2. 메시지 소비| C[알림 Consumer]
-    C -->|3. 실패시| D[DLQ Topic]
-    S[재처리 Scheduler] -->|4. 주기적 조회| D
-    S -->|5. 재발행| K
-```
+![image](https://github.com/user-attachments/assets/b7fa3991-5705-4a68-a23c-51322f7a3859)
+
 
 ### 2.2 메시지 처리 흐름
 ```mermaid
@@ -232,7 +226,7 @@ sequenceDiagram
 class KafkaNotificationIntegrationTest {
     @Container
     static KafkaContainer kafka = new KafkaContainer(
-        DockerImageName.parse("confluentinc/cp-kafka:7.3.0")
+        DockerImageName.parse("confluentinc/cp-kafka:7.5.0")
     );
 
     @Test
