@@ -8,34 +8,25 @@ spring:
         format_sql: true
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:concert
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
-  data:
-    redis:
-      host: localhost
-      port: 6379
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${spring.embedded.kafka.brokers}
     consumer:
-      group-id: PAYMENT-CONSUMER-GROUP
+      group-id: test-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "*"
     producer:
-      topic:
-        payment-success: PAYMENT-SUCCESS
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-server:
-  port: 8080
 
 logging:
   level:
-    org.hibernate.SQL: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE
+    org.apache.kafka: ERROR
 
 springdoc:
   api-docs:
