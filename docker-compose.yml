@@ -1,0 +1,108 @@
+version: '3.8'
+services:
+  kafka:
+    image: bitnami/kafka:latest
+    ports:
+      - '9092:9092'
+    environment:
+      # KRaft settings
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      # Listeners
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+  redis-test:
+    image: redis:latest
+    container_name: redis-testContainer
+    ports:
+      - "1331:6379"
+  controller:
+    image: ngrinder/controller
+    platform: linux/amd64
+    restart: always
+    ports:
+      - "9000:80"
+      - "16001:16001"
+      - "12000-12009:12000-12009"
+    volumes:
+      - ./ngrinder-controller:/opt/ngrinder-controller
+  agent:
+    image: ngrinder/agent
+    platform: linux/amd64a
+    restart: always
+    links:
+      - controller
+  prometheus:
+    user: "root"
+    image: prom/prometheus
+    container_name: prometheus_container
+    volumes:
+      - ./prometheus/config:/etc/prometheus
+      - ./prometheus/volume:/prometheus/data
+    ports:
+      - 9090:9090
+    command:
+      - '--web.enable-lifecycle'
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    restart: always
+    networks:
+      - promnet
+  grafana:
+    user: "root"
+    image: grafana/grafana
+    container_name: grafana_container
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana/volume:/var/lib/grafana
+    restart: always
+    networks:
+      - promnet
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - promnet
+  db:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      TZ: Asia/Seoul
+    volumes:
+      - ./db/mysql/data:/var/lib/mysql
+      - ./db/mysql/init:/docker-entrypoint-initdb.d
+    platform: linux/x86_64
+  mysql-exporter:
+    container_name: mysql-exporter
+    image: prom/mysqld-exporter:latest
+    environment:
+      - DATA_SOURCE_NAME= concert
+    command:
+      - "--mysqld.username=root:1234"
+      - "--mysqld.address=host.docker.internal:3306"
+    ports:
+      - "9104:9104"
+    depends_on:
+      - db
+    networks:
+      - app-network
+networks:
+  promnet:
+    driver: bridge
+  app-network:
+    driver: bridge
