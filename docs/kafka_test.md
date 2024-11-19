@@ -220,12 +220,28 @@ class KafkaConnectionTest {
    private static final Logger log = LoggerFactory.getLogger(KafkaConnectionTest.class);
 
    @Container
-   static final KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.5.0"));
+   static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
+
+   @Container
+   static final GenericContainer<?> REDIS_CONTAINER = new GenericContainer<>("redis:latest")
+           .waitingFor(Wait.forListeningPort())
+           .withExposedPorts(6379);
 
    @DynamicPropertySource
    static void overrideProperties(DynamicPropertyRegistry registry) {
-      registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
+      registry.add("spring.kafka.bootstrap-servers", KAFKA_CONTAINER::getBootstrapServers);
+      registry.add("spring.data.redis.host", REDIS_CONTAINER::getHost);
+      registry.add("spring.data.redis.port", () -> REDIS_CONTAINER.getMappedPort(6379));
    }
+
+   @AfterAll
+   public static void stopContainers() {
+      log.info("Stopping containers...");
+      KAFKA_CONTAINER.stop();
+      KAFKA_CONTAINER.stop();
+      log.info("Containers stopped successfully.");
+   }
+
    @Autowired
    private KafkaTemplate<String, String> kafkaTemplate;
    private String receivedMessage;
@@ -251,6 +267,7 @@ class KafkaConnectionTest {
    public void consumeTestMessage(String message) {
       this.receivedMessage = message;
    }
+
 }
 ```
 ![img_1.png](img_1.png)
