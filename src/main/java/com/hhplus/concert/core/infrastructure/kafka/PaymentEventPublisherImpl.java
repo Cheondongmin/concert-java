@@ -1,19 +1,19 @@
-package com.hhplus.concert.core.infrastructure.event;
+package com.hhplus.concert.core.infrastructure.kafka;
 
 import com.hhplus.concert.core.domain.payment.PaymentEventPublisher;
 import com.hhplus.concert.core.domain.payment.PaymentMessageSendEvent;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class PaymentEventPublisherImpl implements PaymentEventPublisher {
 
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final KafkaTemplate<String, PaymentMessageSendEvent> kafkaTemplate;
 
     @Override
-    public void paymentMassageSend(PaymentMessageSendEvent reservationMessageSendEvent) {
-        applicationEventPublisher.publishEvent(reservationMessageSendEvent);
+    public void paymentMassageSend(PaymentMessageSendEvent event) {
+        kafkaTemplate.send("payment-notification", event);
     }
 }

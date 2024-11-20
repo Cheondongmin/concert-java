@@ -39,7 +39,7 @@ public class TelegramSenderImpl implements MessageSender {
 
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
-    public void sendMessage(String msg) {
+    public void sendMessage(String msg) throws IOException {
         log.info("TelegramSender 에서 텔레그램 메시지 전송 msg:{}", msg);
 
         JsonObject jsonObject = new JsonObject();
@@ -62,8 +62,9 @@ public class TelegramSenderImpl implements MessageSender {
             } else {
                 log.info("Telegram 메시지 전송 성공. 응답 코드: {}", response.code());
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("Telegram API 호출 실패", e);
+            throw e;
         }
     }
 }

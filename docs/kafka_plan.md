@@ -66,6 +66,61 @@ sequenceDiagram
 
 ## 3. 상세 구현
 
+### 3.0 컨슈머 설정
+```java
+@EnableKafka
+@Configuration
+@RequiredArgsConstructor
+@EnableScheduling
+public class KafkaPaymentConfig {
+
+    @Value("${spring.kafka.producer.topic.payment-success}")
+    private String paymentSuccessTopic;
+
+    @Value("${spring.kafka.producer.topic.payment-fail}")
+    private String paymentFailTopic;
+
+    @Value("${spring.kafka.producer.topic.payment-fail-permanent}")
+    private String permanentFailTopic;
+
+    @Bean
+    public NewTopic paymentSuccessTopic() {
+        // 토픽, 생성할 파티션 개수(로드밸런서처럼 라운드-로빈으로 동작함), 레플리케이션팩터(복제본 생성 개수)
+        return new NewTopic(paymentSuccessTopic, 3, (short) 1);
+    }
+
+    @Bean
+    public NewTopic paymentNotificationDlqTopic() {
+        return new NewTopic(paymentFailTopic, 3, (short) 1);
+    }
+
+    @Bean
+    public NewTopic paymentNotificationDlqPermanentTopic() {
+        return new NewTopic(permanentFailTopic, 3, (short) 1);
+    }
+
+    @Bean
+    public DeadLetterPublishingRecoverer deadLetterPublishingRecoverer(KafkaTemplate<Object, Object> template) {
+        return new DeadLetterPublishingRecoverer(template, (record, exception) -> new TopicPartition("payment-notification.DLQ", record.partition()));
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, PaymentMessageSendEvent> kafkaListenerContainerFactory(
+            ConsumerFactory<String, PaymentMessageSendEvent> consumerFactory,
+            DeadLetterPublishingRecoverer deadLetterPublishingRecoverer) {
+
+        ConcurrentKafkaListenerContainerFactory<String, PaymentMessageSendEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory);
+        factory.setConcurrency(1);
+
+        // 에러 핸들러 설정
+        factory.setCommonErrorHandler(new DefaultErrorHandler(deadLetterPublishingRecoverer, new FixedBackOff(1000L, 3)));
+
+        return factory;
+    }
+}
+```
+
 ### 3.1 이벤트 클래스
 ```java
 @Getter
@@ -86,27 +141,36 @@ public class PaymentCompletedEvent {
 @Slf4j
 public class PaymentService {
     private final KafkaTemplate<String, PaymentCompletedEvent> kafkaTemplate;
-    
-    @Transactional
-    public PaymentConcertResult paymentConcert(String token, long reservationId) {
-        // ... 기존 결제 로직 ...
 
-        PaymentCompletedEvent event = new PaymentCompletedEvent(
-            user.getUserMail(),
-            reservation.getConcertTitle(),
-            reservation.getConcertStartDt(),
-            LocalDateTime.now(),
-            reservation.getSeatAmount()
-        );
-        
-        kafkaTemplate.send("payment-notification", event)
-            .addCallback(
-                success -> log.info("알림 발행 성공: {}", event.getMail()),
-                failure -> log.error("알림 발행 실패: {}", event.getMail(), failure)
-            );
+   @Transactional
+   public PaymentConcertResult paymentConcert(String token, long reservationId) {
+      long userId = Users.extractUserIdFromJwt(token);
+      Users user = userRepository.findById(userId);
 
-        return new PaymentConcertResult(...);
-    }
+      Queue queue = queueRepository.findByToken(token);
+      queue.tokenReserveCheck();
+
+      Reservation reservation = reservationRepository.findById(reservationId);
+      user.checkConcertAmount(reservation.getSeatAmount());
+      
+      ConcertSeat concertSeat = concertSeatRepository.findById(reservation.getSeatId());
+      concertSeat.finishSeatReserve();
+
+      queue.finishQueue();
+      reservation.finishReserve();
+
+      Payment payment = paymentRepository.findByReservationId(reservation.getId());
+      payment.finishPayment();
+
+      PaymentHistory paymentHistory = PaymentHistory.enterPaymentHistory(userId, payment.getPrice(), PaymentType.PAYMENT, payment.getId());
+      paymentHistoryRepository.save(paymentHistory);
+
+      // 알림 발행
+      PaymentMessageSendEvent paymentMessageSendEvent = new PaymentMessageSendEvent(user.getUserMail(), reservation.getConcertTitle(), reservation.getConcertStartDt(), LocalDateTime.now(), reservation.getSeatAmount());
+      paymentEventPublisher.paymentMassageSend(paymentMessageSendEvent);
+
+      return new PaymentConcertResult(concertSeat.getAmount(), reservation.getStatus(), queue.getStatus());
+   }
 }
 ```
 
@@ -115,68 +179,183 @@ public class PaymentService {
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class NotificationConsumer {
-    private final MessageSender telegramSender;
-    
-    @KafkaListener(
-        topics = "payment-notification",
-        groupId = "telegram-notification",
-        errorHandler = "deadLetterQueueErrorHandler"
-    )
-    public void handlePaymentNotification(PaymentCompletedEvent event) {
-        try {
-            String message = createTelegramMessage(event);
-            telegramSender.sendMessage(message);
-            log.info("텔레그램 알림 발송 완료: {}", event.getMail());
-        } catch (Exception e) {
-            log.error("텔레그램 알림 발송 실패: {}", event.getMail(), e);
-            throw new DeadLetterQueueException("텔레그램 발송 실패", e);
-        }
-    }
+public class PaymentMessageConsumer {
+
+   private final MessageSender messageSender;
+   private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+   @KafkaListener(
+           topics = "payment-notification",
+           groupId = "telegram-notification",
+           containerFactory = "kafkaListenerContainerFactory"
+   )
+   public void handlePaymentNotification(PaymentMessageSendEvent event) throws Exception {
+      try {
+         String message = String.format("""
+                         🎫 콘서트 결제가 완료되었습니다!
+                         예약자 ID: %s
+                         콘서트: %s
+                         시작 날짜: %s
+                         결제 날짜: %s
+                         결제 금액: %d원
+                         콘서트 시작 10분전에는 꼭 입장 부탁드립니다!!
+                         """,
+                 event.mail(),
+                 event.concertTitle(),
+                 event.startDt().format(dateFormatter),
+                 event.confirmDt().format(dateFormatter),
+                 event.amount()
+         );
+         messageSender.sendMessage(message);
+      } catch (Exception e) {
+         log.error("텔레그램 알림 발송 실패: {}", event.mail(), e);
+         throw e;
+      }
+   }
 }
 ```
 
-### 3.4 DLQ 처리
+### 3.4 재처리 스케줄러
 ```java
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Slf4j
-public class DeadLetterQueueErrorHandler implements ConsumerAwareListenerErrorHandler {
-    private final KafkaTemplate<String, PaymentCompletedEvent> kafkaTemplate;
+public class PaymentDlqRetryScheduler {
 
-    @Override
-    public Object handleError(Message<?> message, ListenerExecutionFailedException exception,
-                            Consumer<?, ?> consumer) {
-        log.error("메시지 처리 실패, DLQ로 이동: {}", exception.getMessage());
-        kafkaTemplate.send("payment-notification.DLQ", message.getPayload());
-        return null;
-    }
-}
-```
+   private final MessageSender messageSender;
+   private final KafkaTemplate<String, PaymentMessageSendEvent> kafkaTemplate;
+   private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+   private static final String RETRY_COUNT_HEADER = "retry-count";
+   private static final int MAX_RETRY_COUNT = 3;
 
-### 3.5 재처리 스케줄러
-```java
-@Component
-@RequiredArgsConstructor
-@Slf4j
-public class RetryScheduler {
-    private final KafkaTemplate<String, PaymentCompletedEvent> kafkaTemplate;
-    private final ObjectMapper objectMapper;
-    
-    @Scheduled(fixedDelay = 300000) // 5분마다 실행
-    public void processFailedMessages() {
-        ConsumerRecords<String, PaymentCompletedEvent> records = 
-            kafkaConsumer.poll(Duration.ofSeconds(1));
-            
-        for (ConsumerRecord<String, PaymentCompletedEvent> record : records) {
-            try {
-                kafkaTemplate.send("payment-notification", record.value());
-                log.info("메시지 재처리 성공: {}", record.value().getMail());
-            } catch (Exception e) {
-                log.error("메시지 재처리 실패: {}", record.value().getMail(), e);
+   @Value("${spring.kafka.bootstrap-servers}")
+   private String bootstrapServers;
+
+   @Value("${spring.kafka.consumer.group-id}")
+   private String groupId;
+
+   @Value("${spring.kafka.producer.topic.payment-fail}")
+   private String dlqTopic;
+
+   @Value("${spring.kafka.producer.topic.payment-fail-permanent}")
+   private String permanentFailTopic;
+
+   @Scheduled(fixedDelay = 300000) // 5분마다 실행
+   public void processFailedMessages() {
+      log.info("DLQ 메시지 재처리 시작");
+
+      Properties props = getProperties();
+
+      try (KafkaConsumer<String, PaymentMessageSendEvent> consumer = new KafkaConsumer<>(props)) {
+         consumer.subscribe(Collections.singletonList(dlqTopic));
+         log.debug("Subscribed to topic: {}", dlqTopic);
+
+         boolean hasRecords = true;
+         while (hasRecords) {
+            ConsumerRecords<String, PaymentMessageSendEvent> records = consumer.poll(Duration.ofMillis(1000));
+
+            if (records.isEmpty()) {
+               hasRecords = false;
+               continue;
             }
-        }
-    }
+
+            log.debug("Fetched {} records from DLQ", records.count());
+
+            for (ConsumerRecord<String, PaymentMessageSendEvent> record : records) {
+               processRecord(record);
+               consumer.commitSync();
+            }
+         }
+      } catch (Exception e) {
+         log.error("DLQ 메시지 처리 중 예외 발생", e);
+      }
+
+      log.info("DLQ 메시지 재처리 완료");
+   }
+
+   private void processRecord(ConsumerRecord<String, PaymentMessageSendEvent> record) {
+      PaymentMessageSendEvent event = record.value();
+      int retryCount = getRetryCount(record);
+
+      if (retryCount >= MAX_RETRY_COUNT) {
+         handleMaxRetryExceeded(event);
+         return;
+      }
+
+      try {
+         String message = String.format("""
+                         🎫 콘서트 결제가 완료되었습니다!
+                         예약자 ID: %s
+                         콘서트: %s
+                         시작 날짜: %s
+                         결제 날짜: %s
+                         결제 금액: %d원
+                         콘서트 시작 10분전에는 꼭 입장 부탁드립니다!!
+                         [재시도 발송 - 시도 횟수: %d]
+                         """,
+                 event.mail(),
+                 event.concertTitle(),
+                 event.startDt().format(dateFormatter),
+                 event.confirmDt().format(dateFormatter),
+                 event.amount(),
+                 retryCount + 1
+         );
+
+         messageSender.sendMessage(message);
+         log.info("DLQ 메시지 재처리 성공 - Mail: {}, Concert: {}, Retry Count: {}",
+                 event.mail(), event.concertTitle(), retryCount);
+
+      } catch (Exception e) {
+         log.error("DLQ 메시지 재처리 실패 - Mail: {}, Concert: {}, Error: {}, Retry Count: {}",
+                 event.mail(), event.concertTitle(), e.getMessage(), retryCount, e);
+
+         // ProducerRecord를 사용하여 헤더를 포함한 메시지 전송
+         ProducerRecord<String, PaymentMessageSendEvent> producerRecord = new ProducerRecord<>(dlqTopic, event);
+         incrementRetryCount(record.headers(), retryCount).forEach(header -> producerRecord.headers().add(header));
+         kafkaTemplate.send(producerRecord);
+      }
+   }
+
+   private void handleMaxRetryExceeded(PaymentMessageSendEvent event) {
+      log.warn("최대 재시도 횟수 초과 - Mail: {}, Concert: {}", event.mail(), event.concertTitle());
+      // 영구 실패 토픽으로 이동
+      kafkaTemplate.send(permanentFailTopic, event);
+   }
+
+   private int getRetryCount(ConsumerRecord<String, PaymentMessageSendEvent> record) {
+      Iterator<Header> headers = record.headers().headers(RETRY_COUNT_HEADER).iterator();
+      if (headers.hasNext()) {
+         Header header = headers.next();
+         return Integer.parseInt(new String(header.value(), StandardCharsets.UTF_8));
+      }
+      return 0;
+   }
+
+   private Iterable<Header> incrementRetryCount(Headers existingHeaders, int currentRetryCount) {
+      List<Header> headers = new ArrayList<>();
+      existingHeaders.forEach(header -> {
+         if (!header.key().equals(RETRY_COUNT_HEADER)) {
+            headers.add(header);
+         }
+      });
+      headers.add(new RecordHeader(RETRY_COUNT_HEADER,
+              String.valueOf(currentRetryCount + 1).getBytes(StandardCharsets.UTF_8)));
+      return headers;
+   }
+
+   @NotNull
+   private Properties getProperties() {
+      Properties props = new Properties();
+      props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+      props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId + "-dlq-retry");
+      props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+      props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class.getName());
+      props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 10);
+      props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+      props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+      props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+      return props;
+   }
 }
 ```
 
@@ -220,136 +399,138 @@ sequenceDiagram
 
 ### 5.1 통합 테스트
 ```java
-@SpringBootTest
-@Testcontainers
-@ActiveProfiles("test")
-class KafkaNotificationIntegrationTest {
-    @Container
-    static KafkaContainer kafka = new KafkaContainer(
-        DockerImageName.parse("confluentinc/cp-kafka:7.5.0")
-    );
+    @Nested
+@DisplayName("기본 Kafka 메시지 전송 테스트")
+class BasicKafkaTests {
+   @KafkaListener(topics = "payment-notification", groupId = "test-group")
+   void consumeTestMessage(PaymentMessageSendEvent event) {
+      receivedEvent = event;
+   }
 
-    @Test
-    @DisplayName("결제 완료시 카프카 메시지가 정상 발행되는지 확인")
-    void paymentCompletedEventTest() {
-        // given
-        PaymentCompletedEvent event = new PaymentCompletedEvent(
-            "test@mail.com",
-            "콘서트",
-            LocalDateTime.now().plusDays(7),
-            LocalDateTime.now(),
-            50000L
-        );
+   @Test
+   @DisplayName("결제 메시지가 정상적으로 전송되고 수신된다")
+   void shouldSendAndReceiveMessage() {
+      // when
+      kafkaTemplate.send("payment-notification", testEvent);
 
-        // when
-        kafkaTemplate.send("payment-notification", event);
+      // then
+      await().atMost(ofSeconds(10))
+              .untilAsserted(() -> {
+                 assertThat(receivedEvent).isNotNull();
+                 assertThat(receivedEvent.mail()).isEqualTo(testEvent.mail());
+                 assertThat(receivedEvent.concertTitle()).isEqualTo(testEvent.concertTitle());
+              });
+   }
+}
 
-        // then
-        ConsumerRecord<String, PaymentCompletedEvent> received = 
-            records.poll(Duration.ofSeconds(10));
-        assertThat(received.value().getMail()).isEqualTo("test@mail.com");
-    }
+@Nested
+@DisplayName("DLQ 동작 테스트")
+class DlqOperationTests {
+   @KafkaListener(topics = "payment-notification.DLQ", groupId = "dlq-test-group")
+   void consumeDlqMessage(PaymentMessageSendEvent event) {
+      dlqReceivedEvent = event;
+   }
 
-    @Test
-    @DisplayName("텔레그램 발송 실패시 DLQ로 메시지가 이동하는지 확인")
-    void deadLetterQueueTest() {
-        // given
-        PaymentCompletedEvent event = new PaymentCompletedEvent(...);
-        mockTelegramServer.givenResponse(500);  // 텔레그램 서버 장애 상황 모킹
+   @Test
+   @DisplayName("메시지 처리 실패 시 DLQ로 이동한다")
+   void shouldMoveToDeadLetterQueue() throws Exception {
+      // given
+      doThrow(new RuntimeException("Simulated failure"))
+              .when(messageSender)
+              .sendMessage(anyString());
 
-        // when
-        kafkaTemplate.send("payment-notification", event);
+      // when
+      kafkaTemplate.send("payment-notification", testEvent);
 
-        // then
-        ConsumerRecord<String, PaymentCompletedEvent> dlqMessage = 
-            dlqConsumer.poll(Duration.ofSeconds(10));
-        assertThat(dlqMessage).isNotNull();
-        assertThat(dlqMessage.topic()).isEqualTo("payment-notification.DLQ");
-    }
-
-    @Test
-    @DisplayName("재처리 스케줄러가 DLQ 메시지를 정상적으로 재처리하는지 확인")
-    void retrySchedulerTest() {
-        // given
-        PaymentCompletedEvent event = new PaymentCompletedEvent(...);
-        kafkaTemplate.send("payment-notification.DLQ", event);
-
-        // when
-        retryScheduler.processFailedMessages();
-
-        // then
-        ConsumerRecord<String, PaymentCompletedEvent> retriedMessage = 
-            records.poll(Duration.ofSeconds(10));
-        assertThat(retriedMessage.topic()).isEqualTo("payment-notification");
-    }
+      // then
+      await().atMost(ofSeconds(10))
+              .untilAsserted(() -> {
+                 assertThat(dlqReceivedEvent).isNotNull();
+                 assertThat(dlqReceivedEvent.mail()).isEqualTo(testEvent.mail());
+              });
+   }
 }
 ```
 
-### 5.2 장애 상황 테스트
+### 5.2 재처리 테스트
 ```java
-@Test
-@DisplayName("네트워크 타임아웃 발생시 DLQ 처리 확인")
-void networkTimeoutTest() {
-    // given
-    PaymentCompletedEvent event = new PaymentCompletedEvent(...);
-    mockTelegramServer
-        .givenResponse()
-        .withFixedDelay(Duration.ofSeconds(31));  // 30초 타임아웃 설정보다 긴 지연
+   @Nested
+@DisplayName("DLQ 재처리 테스트")
+class DlqRetryTests {
+   private String testTopic;
 
-    // when
-    kafkaTemplate.send("payment-notification", event);
+   @BeforeEach
+   void setUpDlqTopic() {
+      testTopic = "payment-notification.DLQ." + UUID.randomUUID();
+      ReflectionTestUtils.setField(scheduler, "dlqTopic", testTopic);
+   }
 
-    // then
-    ConsumerRecord<String, PaymentCompletedEvent> dlqMessage = 
-        dlqConsumer.poll(Duration.ofSeconds(40));
-    assertThat(dlqMessage).isNotNull();
-}
+   @Test
+   @DisplayName("최대 재시도 횟수까지 메시지 재처리를 시도한다")
+   void shouldRetryUntilMaxAttempts() throws Exception {
+      // given
+      doThrow(new RuntimeException("Persistent failure"))
+              .when(messageSender)
+              .sendMessage(anyString());
 
-@Test
-@DisplayName("재처리 최대 횟수 초과 시 더 이상 재시도하지 않음")
-void maxRetryExceededTest() {
-    // given
-    PaymentCompletedEvent event = new PaymentCompletedEvent(...);
-    mockTelegramServer.givenResponse(500);  // 계속 실패하는 상황
+      // when
+      kafkaTemplate.send(testTopic, testEvent).get();
 
-    // when
-    for (int i = 0; i < 4; i++) {  // 최대 재시도 횟수(3) + 1
-        retryScheduler.processFailedMessages();
-        Thread.sleep(300000);  // 5분 대기
-    }
+      // then
+      for (int i = 0; i < 3; i++) {  // MAX_RETRY_COUNT
+         scheduler.processFailedMessages();
+      }
 
-    // then
-    ConsumerRecords<String, PaymentCompletedEvent> records = 
-        consumer.poll(Duration.ofSeconds(10));
-    assertThat(records.isEmpty()).isTrue();
-}
-```
+      verify(messageSender, times(3)).sendMessage(anyString());
+   }
 
-### 5.3 성능 테스트
-```java
-@Test
-@DisplayName("대량의 메시지 처리 성능 테스트")
-void performanceTest() {
-    // given
-    int messageCount = 1000;
-    CountDownLatch latch = new CountDownLatch(messageCount);
-    AtomicInteger successCount = new AtomicInteger(0);
+   @Test
+   @DisplayName("재처리 성공 시 정상적으로 처리된다")
+   void shouldProcessSuccessfullyOnRetry() throws Exception {
+      // given
+      AtomicInteger attempts = new AtomicInteger();
+      doAnswer(inv -> {
+         if (attempts.getAndIncrement() == 0) {
+            throw new RuntimeException("First attempt fails");
+         }
+         return null;
+      }).when(messageSender).sendMessage(anyString());
 
-    // when
-    IntStream.range(0, messageCount).forEach(i -> {
-        PaymentCompletedEvent event = new PaymentCompletedEvent(...);
-        kafkaTemplate.send("payment-notification", event)
-            .addCallback(
-                success -> {
-                    successCount.incrementAndGet();
-                    latch.countDown();
-                },
-                failure -> latch.countDown()
-            );
-    });
+      // when
+      kafkaTemplate.send(testTopic, testEvent).get();
+      scheduler.processFailedMessages();
 
-    // then
-    latch.await(1, TimeUnit.MINUTES);
-    assertThat(successCount.get()).isEqualTo(messageCount);
+      // then
+      verify(messageSender, times(2)).sendMessage(anyString());
+      assertThat(attempts.get()).isEqualTo(2);
+   }
+
+   @Test
+   @DisplayName("여러 메시지를 순차적으로 처리한다")
+   void shouldProcessMultipleMessagesSequentially() throws Exception {
+      // given
+      int messageCount = 3;
+      for (int i = 0; i < messageCount; i++) {
+         PaymentMessageSendEvent event = new PaymentMessageSendEvent(
+                 "test" + i + "@example.com",
+                 "Concert " + i,
+                 LocalDateTime.now().plusDays(7),
+                 LocalDateTime.now(),
+                 50000L
+         );
+         kafkaTemplate.send(testTopic, event).get();
+      }
+
+      // when
+      scheduler.processFailedMessages();
+
+      // then
+      verify(messageSender, times(messageCount)).sendMessage(anyString());
+   }
+
+   @AfterEach
+   void tearDown() {
+      reset(messageSender);
+   }
 }
 ```

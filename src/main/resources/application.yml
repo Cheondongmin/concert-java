@@ -12,6 +12,8 @@ server:
 spring:
   profiles:
     active: test
+  aop:
+    proxy-target-class: true
   data:
     redis:
       host: localhost
@@ -19,7 +21,7 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
-      group-id: PAYMENT-CONSUMER-GROUP
+      group-id: PAYMENT-CONSUMER-GROUlP
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
@@ -27,7 +29,9 @@ spring:
         spring.json.trusted.packages: "*"
     producer:
       topic:
-        payment-success: PAYMENT-SUCCESS
+        payment-success: payment-notification
+        payment-fail: payment-notification.DLQ
+        payment-fail-permanent: payment-notification.DLQ.permanent
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 jwt:
