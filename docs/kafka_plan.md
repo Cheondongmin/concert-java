@@ -180,15 +180,15 @@ public class PaymentService {
 @RequiredArgsConstructor
 @Slf4j
 public class PaymentMessageConsumer {
-
    private final MessageSender messageSender;
    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
    @KafkaListener(
            topics = "payment-notification",
-           groupId = "telegram-notification",
+           groupId = "PAYMENT-CONSUMER-GROUP",
            containerFactory = "kafkaListenerContainerFactory"
    )
+   @Async
    public void handlePaymentNotification(PaymentMessageSendEvent event) throws Exception {
       try {
          String message = String.format("""
