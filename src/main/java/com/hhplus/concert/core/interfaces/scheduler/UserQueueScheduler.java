@@ -13,6 +13,6 @@ public class UserQueueScheduler {
 
     @Scheduled(fixedDelay = 5000)
     public void enteringUserQueue() {
-        userQueueService.periodicallyEnterUserQueue();
+        // userQueueService.periodicallyEnterUserQueue();
     }
 }

@@ -15,6 +15,6 @@ public class SeatAssignReleaseScheduler {
      */
     @Scheduled(fixedDelay = 5000)
     public void checkSeatAssignRelease() {
-        seatAssignReleaseChecker.release();
+        // seatAssignReleaseChecker.release();
     }
 }
