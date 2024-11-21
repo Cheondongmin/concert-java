@@ -477,7 +477,7 @@ class DlqRetryTests {
       kafkaTemplate.send(testTopic, testEvent).get();
 
       // then
-      for (int i = 0; i < 3; i++) {  // MAX_RETRY_COUNT
+      for (int i = 0; i < 5; i++) {  // 5번 시도해도 최대 3번까지
          scheduler.processFailedMessages();
       }
 
