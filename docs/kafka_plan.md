@@ -536,3 +536,4 @@ class DlqRetryTests {
 ```
 ### 5.3 통합 테스트 시 메시지 확인 완료
 ![img_3.png](img_3.png)
+![img_4.png](img_4.png)
