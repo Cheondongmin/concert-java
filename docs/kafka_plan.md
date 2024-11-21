@@ -534,6 +534,8 @@ class DlqRetryTests {
    }
 }
 ```
-### 5.3 통합 테스트 시 메시지 확인 완료
-![img_3.png](img_3.png)
+### 5.3 테스트 통과 확인 완료
 ![img_4.png](img_4.png)
+
+### 5.4 결제부분 실제 호출시 메시지 전송 확인 완료
+![img_3.png](img_3.png)
