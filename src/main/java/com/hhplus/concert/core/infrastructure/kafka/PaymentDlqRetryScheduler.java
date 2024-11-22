@@ -65,7 +65,7 @@ public class PaymentDlqRetryScheduler {
         }
     }
 
-    @Scheduled(fixedDelay = 3000) // 5분마다 실행
+    @Scheduled(fixedDelay = 30000) // 30초 마다 실행
     public void processFailedMessages() {
         log.info("DLQ 메시지 재처리 시작");
         try {

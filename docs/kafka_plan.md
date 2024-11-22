@@ -568,14 +568,14 @@ class DlqRetryTests {
 
 ### 5.5 결제부분 실제 실패시 dlq 적재 확인 완료
 
-![img_10.png](img_10.png)<br>
+![img_19.png](img_19.png)<br>
 (고의로 익셉션 발생)
 
-![img_11.png](img_11.png)<br>
+![img_18.png](img_18.png)<br>
 (익셉션 확인)
 
-![img_12.png](img_12.png)<br>
+![img_20.png](img_20.png)<br>
 (ui를 통하여 dlq 적재 확인)
 
-![img_13.png](img_13.png)<br>
+![img_21.png](img_21.png)<br>
 (실제 메시지 전송도 확인)
