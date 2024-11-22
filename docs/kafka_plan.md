@@ -399,7 +399,7 @@ sequenceDiagram
 
 ### 5.1 통합 테스트
 ```java
-    @Nested
+@Nested
 @DisplayName("기본 Kafka 메시지 전송 테스트")
 class BasicKafkaTests {
    @KafkaListener(topics = "payment-notification", groupId = "test-group")
@@ -454,34 +454,36 @@ class DlqOperationTests {
 
 ### 5.2 재처리 테스트
 ```java
-   @Nested
+@Nested
 @DisplayName("DLQ 재처리 테스트")
 class DlqRetryTests {
-   private String testTopic;
-
-   @BeforeEach
-   void setUpDlqTopic() {
-      testTopic = "payment-notification.DLQ." + UUID.randomUUID();
-      ReflectionTestUtils.setField(scheduler, "dlqTopic", testTopic);
-   }
 
    @Test
    @DisplayName("최대 재시도 횟수까지 메시지 재처리를 시도한다")
    void shouldRetryUntilMaxAttempts() throws Exception {
       // given
-      doThrow(new RuntimeException("Persistent failure"))
-              .when(messageSender)
-              .sendMessage(anyString());
+      AtomicInteger retryCount = new AtomicInteger(0);
+      doAnswer(invocation -> {
+         String message = invocation.getArgument(0);
+         // DLQ 재처리 메시지만 카운트 (재시도 메시지에만 포함된 텍스트로 구분)
+         if (message.contains("재시도 발송")) {
+            retryCount.incrementAndGet();
+         }
+         throw new RuntimeException("Persistent failure");
+      }).when(messageSender).sendMessage(anyString());
 
-      // when
-      kafkaTemplate.send(testTopic, testEvent).get();
+      // when - 실패하는 메시지 발송
+      kafkaTemplate.send("payment-notification", testEvent).get();
+      Thread.sleep(5000); // DLQ로 이동 대기
 
-      // then
-      for (int i = 0; i < 5; i++) {  // 5번 시도해도 최대 3번까지
+      // then - DLQ에서 재시도
+      for (int i = 0; i < 5; i++) {
          scheduler.processFailedMessages();
+         Thread.sleep(1000);
       }
 
-      verify(messageSender, times(3)).sendMessage(anyString());
+      // DLQ 재처리 횟수만 확인
+      assertThat(retryCount.get()).isEqualTo(3);
    }
 
    @Test
@@ -497,8 +499,11 @@ class DlqRetryTests {
       }).when(messageSender).sendMessage(anyString());
 
       // when
-      kafkaTemplate.send(testTopic, testEvent).get();
+      kafkaTemplate.send("payment-notification", testEvent).get();
+      Thread.sleep(2000); // DLQ로 이동 대기
+
       scheduler.processFailedMessages();
+      Thread.sleep(1000); // 처리 대기
 
       // then
       verify(messageSender, times(2)).sendMessage(anyString());
@@ -509,8 +514,12 @@ class DlqRetryTests {
    @DisplayName("여러 메시지를 순차적으로 처리한다")
    void shouldProcessMultipleMessagesSequentially() throws Exception {
       // given
-      int messageCount = 3;
-      for (int i = 0; i < messageCount; i++) {
+      doThrow(new RuntimeException("Simulated failure"))
+              .when(messageSender)
+              .sendMessage(anyString());
+
+      // when
+      for (int i = 0; i < 3; i++) {
          PaymentMessageSendEvent event = new PaymentMessageSendEvent(
                  "test" + i + "@example.com",
                  "Concert " + i,
@@ -518,24 +527,21 @@ class DlqRetryTests {
                  LocalDateTime.now(),
                  50000L
          );
-         kafkaTemplate.send(testTopic, event).get();
+         kafkaTemplate.send("payment-notification", event).get();
       }
+      Thread.sleep(2000); // DLQ로 이동 대기
 
-      // when
+      reset(messageSender); // 실패 설정 초기화
       scheduler.processFailedMessages();
+      Thread.sleep(1000);
 
       // then
-      verify(messageSender, times(messageCount)).sendMessage(anyString());
-   }
-
-   @AfterEach
-   void tearDown() {
-      reset(messageSender);
+      verify(messageSender, times(3)).sendMessage(anyString());
    }
 }
 ```
 ### 5.3 테스트 통과 확인 완료
-![img_4.png](img_4.png)<br>
+![img_16.png](img_16.png)<br>
 
 
 
@@ -558,6 +564,7 @@ class DlqRetryTests {
 ![img_9.png](img_9.png)<br>
 (실제 메시지 전송 확인)
 
+<br>
 
 ### 5.5 결제부분 실제 실패시 dlq 적재 확인 완료
 
@@ -569,3 +576,6 @@ class DlqRetryTests {
 
 ![img_12.png](img_12.png)<br>
 (ui를 통하여 dlq 적재 확인)
+
+![img_13.png](img_13.png)<br>
+(실제 메시지 전송도 확인)

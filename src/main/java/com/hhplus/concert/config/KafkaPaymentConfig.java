@@ -21,7 +21,6 @@ import org.springframework.util.backoff.FixedBackOff;
 @RequiredArgsConstructor
 @EnableScheduling
 public class KafkaPaymentConfig {
-
     @Value("${spring.kafka.producer.topic.payment-success}")
     private String paymentSuccessTopic;
 
@@ -33,7 +32,6 @@ public class KafkaPaymentConfig {
 
     @Bean
     public NewTopic paymentSuccessTopic() {
-        // 토픽, 생성할 파티션 개수(로드밸런서처럼 라운드-로빈으로 동작함), 레플리케이션팩터(복제본 생성 개수)
         return new NewTopic(paymentSuccessTopic, 3, (short) 1);
     }
 
@@ -48,8 +46,12 @@ public class KafkaPaymentConfig {
     }
 
     @Bean
-    public DeadLetterPublishingRecoverer deadLetterPublishingRecoverer(KafkaTemplate<Object, Object> template) {
-        return new DeadLetterPublishingRecoverer(template, (record, exception) -> new TopicPartition("payment-notification.DLQ", record.partition()));
+    public DeadLetterPublishingRecoverer deadLetterPublishingRecoverer(
+            KafkaTemplate<Object, Object> template,
+            @Value("${spring.kafka.producer.topic.payment-fail}") String dlqTopic
+    ) {
+        return new DeadLetterPublishingRecoverer(template,
+                (record, exception) -> new TopicPartition(dlqTopic, record.partition()));
     }
 
     @Bean
@@ -57,12 +59,14 @@ public class KafkaPaymentConfig {
             ConsumerFactory<String, PaymentMessageSendEvent> consumerFactory,
             DeadLetterPublishingRecoverer deadLetterPublishingRecoverer) {
 
-        ConcurrentKafkaListenerContainerFactory<String, PaymentMessageSendEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, PaymentMessageSendEvent> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.setConcurrency(1);
-
-        // 에러 핸들러 설정
-        factory.setCommonErrorHandler(new DefaultErrorHandler(deadLetterPublishingRecoverer, new FixedBackOff(1000L, 3)));
+        factory.setCommonErrorHandler(new DefaultErrorHandler(
+                deadLetterPublishingRecoverer,
+                new FixedBackOff(1000L, 3)
+        ));
 
         return factory;
     }
