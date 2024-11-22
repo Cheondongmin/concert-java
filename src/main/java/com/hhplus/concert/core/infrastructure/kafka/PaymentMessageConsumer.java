@@ -40,6 +40,7 @@ public class PaymentMessageConsumer {
                     event.confirmDt().format(dateFormatter),
                     event.amount()
             );
+            log.info("텔레그램 알림 발송: event:{}, message:{}", event, message);
             messageSender.sendMessage(message);
         } catch (Exception e) {
             log.error("텔레그램 알림 발송 실패: {}", event.mail(), e);

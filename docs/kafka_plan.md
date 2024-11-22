@@ -538,4 +538,14 @@ class DlqRetryTests {
 ![img_4.png](img_4.png)
 
 ### 5.4 결제부분 실제 호출시 메시지 전송 확인 완료
-![img_3.png](img_3.png)
+![img_5.png](img_5.png)
+(컨슈머 클래스에 잘 들어오는지 로그 체크)
+
+![img_6.png](img_6.png)
+(로그 확인)
+
+![img_7.png](img_7.png)
+(UI를 통하여 컨슘된 메시지 확인)
+
+![img_9.png](img_9.png)
+(실제 메시지 전송 확인)
