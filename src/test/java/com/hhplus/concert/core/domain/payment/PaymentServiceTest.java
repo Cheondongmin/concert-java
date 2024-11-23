@@ -2,6 +2,7 @@ package com.hhplus.concert.core.domain.payment;
 
 import com.hhplus.concert.IntegrationTest;
 import com.hhplus.concert.core.domain.concert.*;
+import com.hhplus.concert.core.domain.message.MessageSender;
 import com.hhplus.concert.core.domain.queue.Queue;
 import com.hhplus.concert.core.domain.queue.QueueRepository;
 import com.hhplus.concert.core.domain.queue.QueueStatus;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -51,6 +53,9 @@ class PaymentServiceTest extends IntegrationTest {
 
     @Autowired
     private ReservationService reservationService;
+
+    @MockBean
+    private MessageSender messageSender;
 
     @Nested
     class IntegrationTests {

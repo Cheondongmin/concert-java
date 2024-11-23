@@ -1,5 +1,6 @@
 package com.hhplus.concert.core.domain.reservation;
 
+import com.hhplus.concert.core.interfaces.api.exception.ApiException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -7,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 class ReservationUnitTest {
@@ -81,11 +83,8 @@ class ReservationUnitTest {
             reservation.finishReserve(); // RESERVED 상태로 먼저 변경
             assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
 
-            // when
-            reservation.finishReserve(); // 한 번 더 상태 변경 시도
-
-            // then
-            assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+            // when & then
+            assertThatThrownBy(reservation::finishReserve).isInstanceOf(IllegalArgumentException.class).hasMessage("잘못 된 상태입니다.");
         }
     }
 }

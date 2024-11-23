@@ -45,6 +45,7 @@ dependencies {
 	// test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation "org.testcontainers:junit-jupiter"
 
 	// gson
 	implementation 'com.google.code.gson:gson:2.8.9'
@@ -61,11 +62,16 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // 필요한 경우 JSON 처리용
 
 	// redis
-	implementation 'org.redisson:redisson-spring-boot-starter:3.24.3'
+	implementation 'org.redisson:redisson-spring-boot-starter:3.37.0'
 	implementation 'io.lettuce:lettuce-core'
 
 	// https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp
 	implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+
+	// kafka
+	implementation 'org.springframework.kafka:spring-kafka'
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
+	testImplementation 'org.testcontainers:kafka'
 }
 
 tasks.named('test') {

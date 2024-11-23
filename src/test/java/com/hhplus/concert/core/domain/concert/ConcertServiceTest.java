@@ -45,7 +45,7 @@ public class ConcertServiceTest extends IntegrationTest {
             // given
             Users user = new Users(1L, 1000L); // 유저 잔액은 1000
             userRepository.save(user);
-            String token = "eyJhbGciOiJub25lIn0.eyJ1c2VySWQiOjEsInRva2VuIjoiMzc2NzcxMTctNzZjMy00NjdjLWFmMjEtOTY0ODI3Nzc3YTU3IiwiZW50ZXJlZER0IjoxNzI5MDY3NjIxMTIwLCJleHBpcmVkRHQiOjE3MjkwNjk0MjExMjB9.";
+            String token = Queue.generateJwtToken(1L);
             Queue queue = new Queue(user.getId(), token, QueueStatus.PROGRESS, null);
             queueRepository.save(queue);
 
@@ -54,11 +54,11 @@ public class ConcertServiceTest extends IntegrationTest {
             concertRepository.save(concert);
             ConcertSchedule concertSchedule = new ConcertSchedule(1L, concert.getId(), LocalDateTime.now().toLocalDate(), LocalDateTime.now(), LocalDateTime.now().plusHours(2), 50, 50, TotalSeatStatus.AVAILABLE, LocalDateTime.now(), false);
             concertScheduleRepository.save(concertSchedule);
-            ConcertSeat concertSeat = new ConcertSeat(1L, concertSchedule.getId(), 500L, 1, SeatStatus.TEMP_RESERVED, null, LocalDateTime.now(), false);
+            ConcertSeat concertSeat = new ConcertSeat(1L, concertSchedule.getId(), 500L, 1, SeatStatus.RESERVED, null, LocalDateTime.now(), false);
             concertSeatRepository.save(concertSeat);
 
             // when & then
-            assertThatThrownBy(() -> reservationService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId())).isInstanceOf(ApiException.class).hasMessage("해당 좌석은 예약할 수 없는 상태 입니다.");
+            assertThatThrownBy(() -> reservationService.reserveConcert(token, concertSchedule.getId(), concertSeat.getId())).isInstanceOf(RuntimeException.class).hasMessage("해당 정보를 가진 좌석을 조회할 수 없습니다.");
         }
 
         @Test
@@ -66,7 +66,7 @@ public class ConcertServiceTest extends IntegrationTest {
             // given
             Users user = new Users(1L, 1000L); // 유저 잔액은 1000
             userRepository.save(user);
-            String token = "eyJhbGciOiJub25lIn0.eyJ1c2VySWQiOjEsInRva2VuIjoiMzc2NzcxMTctNzZjMy00NjdjLWFmMjEtOTY0ODI3Nzc3YTU3IiwiZW50ZXJlZER0IjoxNzI5MDY3NjIxMTIwLCJleHBpcmVkRHQiOjE3MjkwNjk0MjExMjB9.";
+            String token = Queue.generateJwtToken(1L);
             Queue queue = new Queue(user.getId(), token, QueueStatus.PROGRESS, null);
             queueRepository.save(queue);
 
