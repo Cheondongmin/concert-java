@@ -328,12 +328,7 @@ docker-compose logs kafka
 
 ## 결론
 
-이 가이드는 Spring Boot 애플리케이션에 Kafka를 통합하는 전체 과정을 다루었습니다. Docker를 통한 로컬 환경 구성부터 테스트 작성까지, 실제 프로덕션 환경에서 활용할 수 있는 기본적인 설정과 구현 방법을 제공합니다. 특히 다음과 같은 핵심 내용을 다루었습니다:
-
-- Docker Compose를 통한 Kafka 환경 구성
-- Spring Boot와 Kafka 통합 설정
-- TestContainers를 활용한 통합 테스트
-- 모니터링 및 운영 고려사항
+이 가이드는 Spring Boot 애플리케이션에 Kafka를 통합하는 전체 과정을 다루었습니다.
 
 ## 부록
 
