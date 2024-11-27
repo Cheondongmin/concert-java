@@ -5,11 +5,12 @@ export const options = {
     scenarios: {
         concert_reservation: {
             executor: 'ramping-vus',
-            startVUs: 10, // 시작 VU 수
+            startVUs: 0, // 시작 VU 수
             stages: [
-                { duration: '10s', target: 100 }, // 10초 동안 VU를 100으로 증가
-                { duration: '30s', target: 100 }, // 30초 동안 VU 유지
-                { duration: '10s', target: 0 }, // 10초 동안 VU 감소
+                { duration: '15s', target: 50 },
+                { duration: '15s', target: 150 },
+                { duration: '15s', target: 50 },
+                { duration: '15s', target: 0 },
             ],
         },
     },

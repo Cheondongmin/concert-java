@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -22,8 +24,8 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -101,12 +103,34 @@ services:
       - app-network
     depends_on:
       - influxdb
+    command: run /scripts/total_test.js
+
+
+  concert:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: concert
+    ports:
+      - "8080:8080"
+    environment:
+      TZ: Asia/Seoul
+    platform: linux/amd64
+    depends_on:
+      - mariadb
+      - kafka
+      - redis
+    deploy:
+      resources:
+        limits:
+          cpus: '6'    # 최대 6개의 CPU 사용
+          memory: 8GB   # 최대 8GB 메모리 사용
+        reservations:
+          cpus: '2'    # 최소 2개의 CPU 보장
+          memory: 4GB   # 최소 4GB 메모리 보장
+    networks:
+      - app-network
 
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  mariadb_data:
-  influxdb_data:
-  grafana_data:
