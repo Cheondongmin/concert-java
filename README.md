@@ -8,6 +8,9 @@
 (yaml 파일로 확인하는 방법은 [yaml 가이드](https://github.com/Cheondongmin/hhplus-concert-java/blob/main/docs/swagger_yaml_guide.md) 에 가이드 되어있습니다.)
 ### [패키지 구조](https://github.com/Cheondongmin/hhplus-concert-java/blob/main/docs/pakege_guide.md)
 ### [동시성 제어 시나리오](https://github.com/Cheondongmin/hhplus-concert-java/blob/main/docs/concurrency.md)
+### [부하테스트 시나리오](https://github.com/Cheondongmin/hhplus-concert-java/blob/main/docs/test/performence-test.md)
+### [성능 지표 분석 및 병목 지점 탐색](https://github.com/Cheondongmin/hhplus-concert-java/blob/main/docs/test/performance-analysis.md)
+
 ### [기술 스택]
 - SpringBoot 3.2
 - DB: H2 / mariaDB
