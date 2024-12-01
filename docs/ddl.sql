@@ -36,6 +36,7 @@ create table CONCERT_SEAT
     reserved_until_dt   datetime null comment '임시 예약 만료 시간',
     created_dt          datetime not null comment '생성 시간',
     is_delete           tinyint(1) default 0                            not null comment '삭제 여부 (Y, N)',
+    version             int default 0                            not null comment '낙관적 락 사용하기 위한 버전 컬럼',
     constraint fk_concert_seat_schedule
         foreign key (concert_schedule_id) references CONCERT_SCHEDULE (id)
             on update cascade on delete cascade
@@ -48,7 +49,8 @@ create table USERS
     user_mail   varchar(255)                         not null comment '유저 메일',
     user_amount bigint                               not null comment '잔액',
     created_dt  datetime default current_timestamp() not null comment '생성 시간',
-    is_delete   tinyint(1) default 0                   not null comment '삭제 여부 (Y, N)'
+    version     int default 0                not null comment '낙관적 락 사용하기 위한 버전 컬럼',
+    is_delete   tinyint(1) default 0                 not null comment '삭제 여부 (Y, N)'
 );
 
 create table QUEUE

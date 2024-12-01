@@ -30,6 +30,41 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
+resilience4j:
+  circuitbreaker:
+    metrics:
+      enabled: true
+    instances:
+      concertService:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 100  # 창 크기 증가
+        minimumNumberOfCalls: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s  # 복구 시간 단축
+        permittedNumberOfCallsInHalfOpenState: 10
+        recordExceptions:
+          - java.lang.Exception
+        ignoreExceptions:
+          - com.hhplus.concert.core.interfaces.api.exception.ApiException
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+
+      queueService:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 100
+        minimumNumberOfCalls: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 10
+        recordExceptions:
+          - java.lang.Exception
+        ignoreExceptions:
+          - com.hhplus.concert.core.interfaces.api.exception.ApiException
+  bulkhead:  # 동시 요청 제한 추가
+    instances:
+      default:
+        maxConcurrentCalls: 100
+        maxWaitDuration: 500ms
+
 logging:
   level:
     org.apache.kafka: DEBUG

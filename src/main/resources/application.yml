@@ -11,15 +11,15 @@ server:
 
 spring:
   profiles:
-    active: test
+    active: dev
   aop:
     proxy-target-class: true
   data:
     redis:
-      host: localhost
+      host: host.docker.internal
       port: 6379
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: host.docker.internal:9092
     consumer:
       group-id: PAYMENT-CONSUMER-GROUlP
       auto-offset-reset: earliest

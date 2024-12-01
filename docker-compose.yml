@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -9,7 +10,7 @@ services:
     ports:
       - "2181:2181"
     networks:
-      - kafka-network
+      - app-network
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
@@ -23,14 +24,14 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
     networks:
-      - kafka-network
+      - app-network
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -44,8 +45,92 @@ services:
     depends_on:
       - kafka
     networks:
-      - kafka-network
+      - app-network
+
+  mariadb:
+    image: mariadb:10.5
+    container_name: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: '1234'
+      MYSQL_DATABASE: concert
+      MYSQL_USER: user
+      MYSQL_PASSWORD: '1234'
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+
+  redis:
+    image: redis:6.2
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+  influxdb:
+    image: influxdb:1.8
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      INFLUXDB_DB: k6
+      INFLUXDB_HTTP_AUTH_ENABLED: false
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - influxdb
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    networks:
+      - app-network
+
+  k6:
+    image: grafana/k6:latest
+    container_name: k6
+    environment:
+      - K6_OUT=influxdb=http://influxdb:8086/k6
+    volumes:
+      - /Users/cheondongmin/IdeaProjects/hhplus-concert-java/src/main/resources/k6:/scripts
+    networks:
+      - app-network
+    depends_on:
+      - influxdb
+    command: run /scripts/total_test.js
+
+
+  concert:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: concert
+    ports:
+      - "8080:8080"
+    environment:
+      TZ: Asia/Seoul
+    platform: linux/amd64
+    depends_on:
+      - mariadb
+      - kafka
+      - redis
+    deploy:
+      resources:
+        limits:
+          cpus: '6'    # 최대 6개의 CPU 사용
+          memory: 8GB   # 최대 8GB 메모리 사용
+        reservations:
+          cpus: '2'    # 최소 2개의 CPU 보장
+          memory: 4GB   # 최소 4GB 메모리 보장
+    networks:
+      - app-network
 
 networks:
-  kafka-network:
+  app-network:
     driver: bridge

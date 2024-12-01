@@ -4,6 +4,7 @@ import com.hhplus.concert.core.domain.queue.Queue;
 import com.hhplus.concert.core.domain.queue.QueueStatus;
 import com.hhplus.concert.core.domain.user.Users;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -11,13 +12,14 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
 public class QueueRedisRepository {
-
     private final RedisTemplate<String, String> redisTemplate;
     private static final String WAITING_QUEUE_KEY = "waiting-queue:";
+    private static final String QUEUE_STATUS_KEY = "queue-status:";
 
     // Redis 키 생성
     private String generateKey(Long userId) {
@@ -26,11 +28,18 @@ public class QueueRedisRepository {
 
     // Queue를 Redis에 추가
     public void add(Queue queue) {
-        String key = generateKey(queue.getUserId());
-        long score = queue.getEnteredDt().toEpochSecond(ZoneOffset.UTC);
-        String serializedQueue = serialize(queue);
-        redisTemplate.opsForZSet().add(key, serializedQueue, score);
-        redisTemplate.expire(key, 5, TimeUnit.MINUTES);
+        redisTemplate.execute((RedisCallback<Object>) connection -> {
+            byte[] key = generateKey(queue.getUserId()).getBytes();
+            byte[] statusKey = (QUEUE_STATUS_KEY + queue.getStatus()).getBytes();
+            byte[] value = serialize(queue).getBytes();
+
+            connection.openPipeline();
+            connection.zAdd(key, queue.getEnteredDt().toEpochSecond(ZoneOffset.UTC), value);
+            connection.sAdd(statusKey, value);
+            connection.expire(key, TimeUnit.MINUTES.toSeconds(5));
+            connection.closePipeline();
+            return null;
+        });
     }
 
     // 수동 직렬화 메서드 (객체 -> 문자열)
@@ -75,16 +84,18 @@ public class QueueRedisRepository {
         return Optional.empty();
     }
 
-    // 상태별 Queue를 시간 역순으로 조회
+    // 상태별 Queue 조회 최적화
     public List<Queue> findOrderByDescByStatus(QueueStatus status) {
-        List<Queue> orderedQueues = new ArrayList<>();
-        for (Queue queue : findAll()) {
-            if (queue.getStatus().equals(status)) {
-                orderedQueues.add(queue);
-            }
+        String statusKey = QUEUE_STATUS_KEY + status;
+        Set<String> queueSet = redisTemplate.opsForSet().members(statusKey);
+        if (queueSet == null || queueSet.isEmpty()) {
+            return Collections.emptyList();
         }
-        orderedQueues.sort((q1, q2) -> q2.getEnteredDt().compareTo(q1.getEnteredDt()));
-        return orderedQueues;
+
+        return queueSet.stream()
+                .map(this::deserialize)
+                .sorted((q1, q2) -> q2.getEnteredDt().compareTo(q1.getEnteredDt()))
+                .collect(Collectors.toList());
     }
 
     // 특정 시간 이전의 상태별 Queue 수 조회
@@ -130,26 +141,25 @@ public class QueueRedisRepository {
         return queueList;
     }
 
-    // 상태별 Queue 개수 조회
+    // 카운트 최적화
     public int countByStatus(QueueStatus status) {
-        int count = 0;
-        for (Queue queue : findAll()) {
-            if (queue.getStatus().equals(status)) {
-                count++;
-            }
-        }
-        return count;
+        String statusKey = QUEUE_STATUS_KEY + status;
+        Long size = redisTemplate.opsForSet().size(statusKey);
+        return size != null ? size.intValue() : 0;
     }
 
-    // 대기 상태의 상위 N개 Queue 조회
-    public List<Queue> findTopNWaiting(int remainingSlots) {
-        List<Queue> waitingQueues = new ArrayList<>();
-        for (Queue queue : findAll()) {
-            if (queue.getStatus() == QueueStatus.WAITING) {
-                waitingQueues.add(queue);
-            }
+    // findTopNWaiting 최적화
+    public List<Queue> findTopNWaiting(int limit) {
+        String statusKey = QUEUE_STATUS_KEY + QueueStatus.WAITING;
+        Set<String> waitingSet = redisTemplate.opsForSet().members(statusKey);
+        if (waitingSet == null || waitingSet.isEmpty()) {
+            return Collections.emptyList();
         }
-        waitingQueues.sort(Comparator.comparing(Queue::getEnteredDt));
-        return waitingQueues.subList(0, Math.min(remainingSlots, waitingQueues.size()));
+
+        return waitingSet.stream()
+                .map(this::deserialize)
+                .sorted(Comparator.comparing(Queue::getEnteredDt))
+                .limit(limit)
+                .collect(Collectors.toList());
     }
 }

@@ -72,6 +72,23 @@ dependencies {
 	implementation 'org.springframework.kafka:spring-kafka'
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
 	testImplementation 'org.testcontainers:kafka'
+
+	// Resilience4j
+	implementation 'io.github.resilience4j:resilience4j-spring-boot2:2.1.0'
+	implementation 'io.github.resilience4j:resilience4j-circuitbreaker:2.1.0'
+	implementation 'io.github.resilience4j:resilience4j-all:2.1.0'  // 모든 모듈 포함
+
+	// Actuator
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-core'
+}
+
+jar {
+	manifest {
+		attributes(
+				'Main-Class': 'com.hhplus.concert.ConcertApplication'
+		)
+	}
 }
 
 tasks.named('test') {
